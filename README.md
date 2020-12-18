@@ -5,4 +5,4 @@ The Wiki will work as an unofficial archive of knowledge poeple gather through t
 
 # How to contribute
 
-OSoMeTweet will be a community project. If you want some features that are not included yet, you are welcome to create and [Pull Request](https://github.com/truthy/osometweet/pulls).
+OSoMeTweet will be a community project. If you want some features that are not included yet, you are welcome to create [Pull Requests](https://github.com/truthy/osometweet/pulls).
