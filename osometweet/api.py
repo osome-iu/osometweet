@@ -1,25 +1,34 @@
 import requests
+import pause
 from typing import Union
-
+from datetime import datetime as dt
+from requests_oauthlib import OAuth1Session
 
 class OsomeTweet:
     def __init__(
         self,
         bearer_token: str = "",
+        consumer_key: str = "",
+        consumer_secret: str = "",
+        access_token: str = "",
+        access_token_secret = "",
         base_url: str = "https://api.twitter.com/2",
     ) -> None:
         self._bearer_token = bearer_token
         self._base_url = base_url
         self._bearer_token = bearer_token
+        self._consumer_key = consumer_key
+        self._consumer_secret = consumer_secret
+        self._access_token = access_token
+        self._access_token_secret = access_token_secret
         self._header = {"Authorization": f"Bearer {self._bearer_token}"}
-        self._params = {
-            "expansions": "",
-            "media.fields": "",
-            "place.fields": "",
-            "poll.fields": "",
-            "tweet.fields": "",
-            "user.fields": "",
-        }
+        
+        # A lot of endpoints can only receive payload paremeters specific
+        # to their endpoint, initializing with all of the different objects
+        # will lead to a 401 error if we have unnecessary objects so we can
+        # solve this simply by initializing with an empty dictionary
+        # and updating self._params for each method.
+        self._params = {}
 
     # Setters
     def set_bearer_token(self, bearer_token: str) -> None:
@@ -38,6 +47,72 @@ class OsomeTweet:
             raise ValueError(
                 "Invalid type for parameter bearer_token, must be a string"
             )
+
+    def set_oauth_1a_creds(
+        self,
+        consumer_key: str = "",
+        consumer_secret: str = "",
+        access_token: str = "",
+        access_token_secret = "") -> None:
+        """
+        Sets the user-based OAuth 1.0a tokens.
+        Ref: https://developer.twitter.com/en/docs/authentication/oauth-1-0a
+        
+        :param str consumer_key
+        :param str consumer_secret
+        :param str access_token
+        :param str access_token_secret
+        :returns None
+        :raises ValueError
+        """
+        if isinstance(consumer_key, str):
+            self._consumer_key = consumer_key
+        else:
+            raise ValueError(
+                "Invalid type for parameter consumer_key, must be a string."
+                )
+
+        if isinstance(consumer_secret, str):
+            self._consumer_secret = consumer_secret
+        else:
+            raise ValueError(
+                "Invalid type for parameter consumer_secret, must be a string."
+                )
+
+        if isinstance(access_token, str):
+            self._access_token = access_token
+        else:
+            raise ValueError(
+                "Invalid type for parameter access_token, must be a string."
+                )
+
+        if isinstance(access_token_secret, str):
+            self._access_token_secret = access_token_secret
+        else:
+            raise ValueError(
+                "Invalid type for parameter access_token_secret, must be a string."
+                )
+
+    def get_oauth_1a(self) -> OAuth1Session:
+        """
+        Gets a user-based OAuth 1.0a session object.
+        Ref: https://developer.twitter.com/en/docs/authentication/oauth-1-0a
+        
+        :returns requests_oauthlib.oauth1_session.OAuth1Session
+        :raises Exception
+        """
+        try:
+            # Get oauth object
+            oauth_1a = OAuth1Session(
+                self._consumer_key,
+                client_secret = self._consumer_secret,
+                resource_owner_key = self._access_token,
+                resource_owner_secret = self._access_token_secret
+                )
+            return oauth_1a
+
+        except:
+            raise Exception("Unknown error using the requests_oauthlib.OAuth1Session() method.")
 
     def set_base_url(self, base_url: str) -> None:
         """
@@ -184,3 +259,116 @@ class OsomeTweet:
         return requests.get(
             f"{self._base_url}/tweets", headers=self._header, params=payload
         )
+
+    # User-Lookup
+    def user_lookup_ids(
+        self, 
+        oauth_1a: OAuth1Session,
+        u_ids: Union[list, tuple], 
+        user_fields: Union[list, tuple] = ["id", "name", "username"]) -> requests.models.Response:
+        """
+        Looks-up user account information using unique user id numbers. 
+        User fields included by default match the default parameters from twitter.
+        Ref: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
+ 
+        :param [str, list, tuple] u_ids - Unique user_id numbers (max 100)
+        :returns requests.models.Response
+        :raises Exception, ValueError
+        """
+        available_user_fields = [
+        "created_at", "description", "entities", "id", 
+        "location", "name", "pinned_tweet_id", "profile_image_url", 
+        "protected", "public_metrics", "url", "username", "verified", "withheld"
+        ]
+
+        # Check type of u_ids and user_fields 
+        if (isinstance(u_ids, (list, tuple))) and (isinstance(user_fields, (list,tuple))):
+            # Check all provided user fields are in the available set
+            if all([x in available_user_fields for x in user_fields]):
+                # Check no more than 100 ids were passed
+                if len(u_ids) <= 100:
+                    # Update payload.
+                    payload = {
+                    "ids": f"{','.join(u_ids)}",
+                    "user.fields": f"{','.join(user_fields)}"
+                    }
+
+                else:
+                    raise Exception(f"You passed {len(u_ids)} tweet ids. \
+                        This exceeds the maximum for a single query, 100")
+
+            else:
+                raise Exception(
+                    f"Invalid user_field(s) provided. Please make sure \
+                    they are one of the following fields:\n\n \
+                    {print(x) for x in available_user_fields}")
+        else:
+            raise ValueError(
+            "Invalid parameter type. Both `u_ids` and \
+            `user_fields` must be either a list or tuple."
+                )
+
+
+        # Update payload with any preset parameters
+        # building on top of what may have already been set with 
+        # set_user_fields()
+        payload.update(self._params)
+        print(payload)
+
+        # Pull Data. Wait when necessary and catching time dependent errors.
+        switch = True
+    
+        while switch:
+            # Get response
+            response = oauth_1a.get(f"{self._base_url}/users", params=payload)
+        
+            # Get number of requests left with our tokens
+            remaining_requests = int(response.headers["x-rate-limit-remaining"])
+            
+            # If that number is one, we get the reset-time 
+            #   and wait until then, plus 15 seconds (your welcome Twitter).
+            # The regular 429 exception is caught below as well, 
+            #   however, we want to program defensively, where possible.
+            if remaining_requests == 1:
+                buffer_wait_time = 15 
+                resume_time = dt.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
+                print(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
+                pause.until(resume_time)
+
+            # Explicitly checking for time dependent errors.
+            # Most of these errors can be solved simply by waiting
+            # a little while and pinging Twitter again - so that's what we do.
+            if response.status_code != 200:
+
+                # Too many requests error
+                if response.status_code == 429:
+                    buffer_wait_time = 15 
+                    resume_time = dt.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
+                    print(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
+                    pause.until(resume_time)
+
+                # Twitter internal server error
+                elif response.status_code == 500:
+                    # Twitter needs a break, so we wait 30 seconds
+                    resume_time = dt.now().timestamp() + 30
+                    print(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
+                    pause.unit(resume_time)
+
+                # Twitter service unavailable error
+                elif response.status_code == 503:
+                    # Twitter needs a break, so we wait 30 seconds
+                    resume_time = dt.now().timestamp() + 30
+                    print(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
+                    pause.unit(resume_time)
+
+                # If we get this far, we've done something wrong and should exit
+                raise Exception(
+                    "Request returned an error: {} {}".format(
+                        response.status_code, response.text
+                    )
+                )
+            
+            # Each time we get a 200 response, lets exit the function and return the response.json
+            if response.ok:
+                return response
+        
