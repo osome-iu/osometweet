@@ -43,11 +43,21 @@ change your access keys/tokens and may break other code
 that relied on those tokens/keys.
 """
 
-#### Set your keys/tokens ###
-consumer_key = ""
-consumer_secret = ""
-access_token = ""
-access_token_secret = ""
+# To set your enviornment variables, in your terminal execute
+# a command like:
+#       export 'CONSUMER_KEY'='<your_consumer_token>'
+# replacinging <your_consumer_token> with the tokens that 
+# Twitter provided you. Repeat this process for each token 
+# that you need. This set's environment variables that you
+# can load using the `os.environ.get()` method as you see
+# below.
+
+# Set Twitter tokens/keys.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+consumer_key = os.environ.get("CONSUMER_KEY")
+consumer_secret = os.environ.get("CONSUMER_SECRET")
+access_token = os.environ.get("ACCESS_TOKEN")
+access_token_secret = os.environ.get("ACCESS_TOKEN_SECRET")
 
 # With these keys/tokens, we can pass them to the OsomeTweet
 # object (ot) by using the below method

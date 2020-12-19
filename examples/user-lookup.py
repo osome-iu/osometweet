@@ -38,15 +38,17 @@ args = parser.parse_args()
 
 # Assign them to objects
 file = args.file
-# To set your enviornment variables in your terminal run the following line:
-# export 'BEARER_TOKEN'='<your_bearer_token>'
+# To set your enviornment variables in your terminal execute a command like the 
+# one that you see below. Of course you can change 'CONSUMER_KEY' for whatever 
+# variable you prefer
+# export 'CONSUMER_KEY'='<your_bearer_token>'
 
 # Set Twitter tokens/keys.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-consumer_key = "VvIkzmSTHQtZWW6Map6qUTpEJ"
-consumer_secret = "BpAnC8ejOOZgjBwG0DexQNdBiia259UNmS7yUfQbGpN8z0T0uZ"
-access_token = "1312850357555539972-tuIRugj9vGuIceDnajSSEqmA4zTSP2"
-access_token_secret = "tsiBH8gLTAaf2TDBGcZXmtmUOAU3XpZMqUQjBhIJ8WIsj"
+consumer_key = os.environ.get("CONSUMER_KEY")
+consumer_secret = os.environ.get("CONSUMER_SECRET")
+access_token = os.environ.get("ACCESS_TOKEN")
+access_token_secret = os.environ.get("ACCESS_TOKEN_SECRET")
 
 
 # Create fFnctions.
@@ -54,12 +56,12 @@ access_token_secret = "tsiBH8gLTAaf2TDBGcZXmtmUOAU3XpZMqUQjBhIJ8WIsj"
 def chunker(seq, size):
     # A function which turns one list into a list of many lists that
     # are of length `size` or shorter (the last one)
-        # This returns a GENERATOR for iteration
+        # This returns a list of lists
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
 
 
 def load_users(file):
-    # Load all users, return a list of lists, each 100 
+    # Load all users, return a list of lists, each 100
     # users long.
     #   This allows us to iterate through a long list of users
     # 100 users at a time (which is the maximum number of ids
@@ -90,7 +92,7 @@ def gather_data():
     # Add all user_fields
     user_fields = [
         "created_at", "description", "entities", "location",
-        "pinned_tweet_id", "profile_image_url", "protected", 
+        "pinned_tweet_id", "profile_image_url", "protected",
         "public_metrics", "url", "verified", "withheld"
     ]
 
@@ -115,19 +117,22 @@ def gather_data():
             # Get data and errors
             data = response.json()["data"]
             errors = response.json()["errors"]
-            
+
             # No matter what `data` and `errors` will return, however, they may return `None`.
             try:
                 data_file.writelines(f"{json.dumps(line)}\n" for line in data)
             except TypeError:
-                print("No USER data found in this set of users, skipping to the next set.")
+                print(
+                    "No USER data found in this set of users, skipping to the next set.")
                 pass
-            
+
             try:
                 error_file.writelines(f"{json.dumps(line)}\n" for line in errors)
             except TypeError:
-                print("No problematic users found in this set of user, skipping to the next set.")
+                print(
+                    "No problematic users found in this set of user, skipping to the next set.")
                 pass
+
 
 # Exectue the program
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
