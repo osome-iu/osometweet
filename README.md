@@ -33,4 +33,4 @@ python tests.py
 
 # How to contribute
 
-OSoMeTweet will be a community project. If you want some features that are not included yet, you are welcome to create [Pull Requests](https://github.com/truthy/osometweet/pulls).
+OSoMeTweet will be a community project. If you encounter bugs, please create [issues](https://github.com/truthy/osometweet/issues). If you want to contribute to the project, you are welcome to create [Pull Requests](https://github.com/truthy/osometweet/pulls).
