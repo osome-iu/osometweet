@@ -13,11 +13,16 @@ The Wiki will work as an unofficial archive of knowledge poeple gather through t
 pip install osometweet
 ```
 
-**Warning**: the package is still in development, so the functionalities are very limited and the robustness is low.
+**Warning 1**: the package is still in development, so the functionalities are very limited and the robustness is low.
+
+**Warning 2**: we will try to keep the interface of the package consistent, but there maybe drastic changes in the future.
 
 ## Local development
 
-Clone this project, go to the source directory, type the following command to install the package locally:
+The Pypi version is behind the github version.
+To take avdvantage of the newests features and functionalities, you can install the github version locally.
+
+To do so, clone this project, go to the source directory, type the following command to install the package locally:
 
 ```bash
 pip install -e .
