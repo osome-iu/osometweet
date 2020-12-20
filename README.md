@@ -18,7 +18,7 @@ pip install osometweet
 Clone this project, go to the source directory, type the following command to install the package locally:
 
 ```bash
-pip install -e ./
+pip install -e .
 ```
 
 # Tests
