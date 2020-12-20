@@ -249,38 +249,76 @@ class OsomeTweet:
 
     # User-Lookup
     def user_lookup_ids(
-        self, 
-        u_ids: Union[list, tuple], 
-        user_fields: Union[list, tuple] = ["id", "name", "username"]) -> requests.models.Response:
+            self,
+            user_ids: Union[list, tuple],
+            user_fields: Union[list, tuple] = ["id", "name", "username"]
+        ) -> dict:
+        return self._user_lookup(user_ids, "id", user_fields=user_fields)
+
+    def user_lookup_usernames(
+            self,
+            usernames: Union[list, tuple],
+            user_fields: Union[list, tuple] = ["id", "name", "username"]
+        ) -> dict:
+
+        cleaned_usernames = []
+        for username in usernames:
+            if username.startswith('@'):
+                cleaned_usernames.append(username[1:])
+            else:
+                cleaned_usernames.append(username)
+        return self._user_lookup(cleaned_usernames, "username", user_fields=user_fields)
+
+    def _user_lookup(
+            self, 
+            query: Union[list, tuple], 
+            query_type: str,
+            user_fields: Union[list, tuple] = ["id", "name", "username"]
+        ) -> dict:
         """
         Looks-up user account information using unique user id numbers. 
         User fields included by default match the default parameters from twitter.
         Ref: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
+         and https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
  
-        :param [str, list, tuple] u_ids - Unique user_id numbers (max 100)
+        :param [list, tuple] query - Unique user ids  or usernames (max 100)
+        :param str query_type - type of the query, can be id or username
         :returns requests.models.Response
         :raises Exception, ValueError
         """
+        query_specs = {
+            "id": {
+                "phrase": "user ids",
+                "parameter_name": "ids",
+                "endpoint": "users"
+            },
+            "username": {
+                "phrase": "usernames",
+                "parameter_name": "usernames",
+                "endpoint": "users/by"
+            }
+        }.get(query_type)
+
         available_user_fields = [
             "created_at", "description", "entities", "id", 
             "location", "name", "pinned_tweet_id", "profile_image_url", 
             "protected", "public_metrics", "url", "username", "verified", "withheld"
         ]
 
-        # Check type of u_ids and user_fields 
-        if (isinstance(u_ids, (list, tuple))) and (isinstance(user_fields, (list,tuple))):
+        # Check type of query and user_fields 
+        if (isinstance(query, (list, tuple))) and (isinstance(user_fields, (list,tuple))):
             # Check all provided user fields are in the available set
             if all([x in available_user_fields for x in user_fields]):
                 # Check no more than 100 ids were passed
-                if len(u_ids) <= 100:
+                if len(query) <= 100:
                     # Update payload.
                     payload = {
-                    "ids": f"{','.join(u_ids)}",
+                    query_specs["parameter_name"]: f"{','.join(query)}",
                     "user.fields": f"{','.join(user_fields)}"
                     }
 
                 else:
-                    raise Exception(f"You passed {len(u_ids)} tweet ids. \
+                    raise Exception(f"You passed {len(query)} {query_specs['phrase']}. \
                         This exceeds the maximum for a single query, 100")
 
             else:
@@ -290,7 +328,7 @@ class OsomeTweet:
                     {print(x) for x in available_user_fields}")
         else:
             raise ValueError(
-            "Invalid parameter type. Both `u_ids` and \
+            "Invalid parameter type. Both `query` and \
             `user_fields` must be either a list or tuple."
                 )
 
@@ -299,14 +337,14 @@ class OsomeTweet:
         # building on top of what may have already been set with 
         # set_user_fields()
         payload.update(self._params)
-        print(payload)
+        #print(payload)
 
         # Pull Data. Wait when necessary and catching time dependent errors.
         switch = True
     
         while switch:
             # Get response
-            response = self._make_request('users', payload)
+            response = self._make_request(query_specs["endpoint"], payload)
         
             # Get number of requests left with our tokens
             remaining_requests = int(response.headers["x-rate-limit-remaining"])

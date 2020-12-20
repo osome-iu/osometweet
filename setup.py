@@ -4,8 +4,6 @@ with open("README.md") as f:
     long_description = f.read()
 
 tests_require = [
-    "mock>=1.0.1",
-    "nose>=1.3.3",
     "vcrpy>=1.10.3",
 ]
 
