@@ -21,6 +21,14 @@ Clone this project, go to the source directory, type the following command to in
 pip install -e ./
 ```
 
+# Tests
+
+Go to `tests` directory and run:
+
+```bash
+python tests.py
+```
+
 # How to contribute
 
 OSoMeTweet will be a community project. If you want some features that are not included yet, you are welcome to create [Pull Requests](https://github.com/truthy/osometweet/pulls).
