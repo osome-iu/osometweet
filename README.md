@@ -13,6 +13,8 @@ The Wiki will work as an unofficial archive of knowledge poeple gather through t
 pip install osometweet
 ```
 
+**Warning**: the package is still in development, so the functionalities are very limited and the robustness is low.
+
 ## Local development
 
 Clone this project, go to the source directory, type the following command to install the package locally:
