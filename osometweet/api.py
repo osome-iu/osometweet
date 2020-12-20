@@ -337,7 +337,7 @@ class OsomeTweet:
         # building on top of what may have already been set with 
         # set_user_fields()
         payload.update(self._params)
-        
+
 
         # Pull Data. Wait when necessary and catching time dependent errors.
         switch = True
@@ -357,7 +357,7 @@ class OsomeTweet:
                 buffer_wait_time = 15 
                 resume_time = datetime.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
                 print(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
-                pause.until(resume_time)
+                o_util.pause_until(resume_time)
 
             # Explicitly checking for time dependent errors.
             # Most of these errors can be solved simply by waiting
