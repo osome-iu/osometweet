@@ -31,6 +31,6 @@ Go to `tests` directory and run:
 python tests.py
 ```
 
-# How to contribute
+# How to seek helps and contribute
 
-OSoMeTweet will be a community project. If you encounter bugs, please create [issues](https://github.com/truthy/osometweet/issues). If you want to contribute to the project, you are welcome to create [Pull Requests](https://github.com/truthy/osometweet/pulls).
+OSoMeTweet will be a community project. If you encounter bugs, please create [Issues](https://github.com/truthy/osometweet/issues). If you want to contribute to the project, you are welcome to create [Pull Requests](https://github.com/truthy/osometweet/pulls).
