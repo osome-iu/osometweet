@@ -309,12 +309,10 @@ class OsomeTweet:
             `user_fields` must be either a list or tuple."
                 )
 
-
         # Update payload with any preset parameters
         # building on top of what may have already been set with 
         # set_user_fields()
         payload.update(self._params)
-        print(payload)
 
         # Pull Data. Wait when necessary and catching time dependent errors.
         switch = True
