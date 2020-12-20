@@ -1,8 +1,9 @@
 import requests
 import pause
 from typing import Union
-from datetime import datetime as dt
+from datetime import datetime
 from requests_oauthlib import OAuth1Session
+from osometweet import utils as o_util
 
 class OsomeTweet:
     def __init__(
@@ -331,7 +332,7 @@ class OsomeTweet:
             #   however, we want to program defensively, where possible.
             if remaining_requests == 1:
                 buffer_wait_time = 15 
-                resume_time = dt.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
+                resume_time = datetime.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
                 print(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
                 pause.until(resume_time)
 
@@ -343,23 +344,23 @@ class OsomeTweet:
                 # Too many requests error
                 if response.status_code == 429:
                     buffer_wait_time = 15 
-                    resume_time = dt.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
+                    resume_time = datetime.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
                     print(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
-                    pause.until(resume_time)
+                    o_util.pause_until(resume_time)
 
                 # Twitter internal server error
                 elif response.status_code == 500:
                     # Twitter needs a break, so we wait 30 seconds
-                    resume_time = dt.now().timestamp() + 30
+                    resume_time = datetime.now().timestamp() + 30
                     print(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
-                    pause.unit(resume_time)
+                    o_util.pause_until(resume_time)
 
                 # Twitter service unavailable error
                 elif response.status_code == 503:
                     # Twitter needs a break, so we wait 30 seconds
-                    resume_time = dt.now().timestamp() + 30
+                    resume_time = datetime.now().timestamp() + 30
                     print(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
-                    pause.unit(resume_time)
+                    o_util.pause_until(resume_time)
 
                 # If we get this far, we've done something wrong and should exit
                 raise Exception(
