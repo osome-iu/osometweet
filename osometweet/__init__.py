@@ -1,0 +1,1 @@
+from osometweet.api import OsomeTweet

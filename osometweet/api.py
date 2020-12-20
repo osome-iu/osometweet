@@ -9,8 +9,8 @@ class OsomeTweet:
     def __init__(
         self,
         bearer_token: str = "",
-        consumer_key: str = "",
-        consumer_secret: str = "",
+        api_key: str = "",
+        api_key_secret: str = "",
         access_token: str = "",
         access_token_secret = "",
         base_url: str = "https://api.twitter.com/2",
@@ -18,11 +18,19 @@ class OsomeTweet:
         self._bearer_token = bearer_token
         self._base_url = base_url
         self._bearer_token = bearer_token
-        self._consumer_key = consumer_key
-        self._consumer_secret = consumer_secret
+        self._api_key = api_key
+        self._api_key_secret = api_key_secret
         self._access_token = access_token
         self._access_token_secret = access_token_secret
-        self._header = {"Authorization": f"Bearer {self._bearer_token}"}
+        self._use_bearer_token = True
+
+        # Set up oauth based on the parameters
+        # Use bearer token (v2.0) by default
+        if self._bearer_token:
+            self._set_bearer_token()
+        # if bearer token is not present, try v1.0a
+        else:
+            self._set_oauth_1a_creds()
         
         # A lot of endpoints can only receive payload paremeters specific
         # to their endpoint, initializing with all of the different objects
@@ -32,7 +40,7 @@ class OsomeTweet:
         self._params = {}
 
     # Setters
-    def set_bearer_token(self, bearer_token: str) -> None:
+    def _set_bearer_token(self) -> None:
         """
         Sets the bearer token, which authenticates the user using OAuth 2.0.
         Ref: https://developer.twitter.com/en/docs/authentication/oauth-2-0/bearer-tokens
@@ -41,77 +49,49 @@ class OsomeTweet:
         :returns None
         :raises ValueError
         """
-        if isinstance(bearer_token, str):
-            self._bearer_token = bearer_token
+        if isinstance(self._bearer_token, str):
             self._header = {"Authorization": f"Bearer {self._bearer_token}"}
         else:
             raise ValueError(
                 "Invalid type for parameter bearer_token, must be a string"
             )
 
-    def set_oauth_1a_creds(
-        self,
-        consumer_key: str = "",
-        consumer_secret: str = "",
-        access_token: str = "",
-        access_token_secret = "") -> None:
+    def _set_oauth_1a_creds(self) -> None:
         """
         Sets the user-based OAuth 1.0a tokens.
         Ref: https://developer.twitter.com/en/docs/authentication/oauth-1-0a
-        
-        :param str consumer_key
-        :param str consumer_secret
-        :param str access_token
-        :param str access_token_secret
-        :returns None
+
         :raises ValueError
         """
-        if isinstance(consumer_key, str):
-            self._consumer_key = consumer_key
-        else:
+        if not isinstance(self._api_key, str):
             raise ValueError(
-                "Invalid type for parameter consumer_key, must be a string."
+                "Invalid type for parameter api_key, must be a string."
                 )
 
-        if isinstance(consumer_secret, str):
-            self._consumer_secret = consumer_secret
-        else:
+        if not isinstance(self._api_key_secret, str):
             raise ValueError(
-                "Invalid type for parameter consumer_secret, must be a string."
+                "Invalid type for parameter api_key_secret, must be a string."
                 )
 
-        if isinstance(access_token, str):
-            self._access_token = access_token
-        else:
+        if not isinstance(self._access_token, str):
             raise ValueError(
                 "Invalid type for parameter access_token, must be a string."
                 )
 
-        if isinstance(access_token_secret, str):
-            self._access_token_secret = access_token_secret
-        else:
+        if not isinstance(self._access_token_secret, str):
             raise ValueError(
                 "Invalid type for parameter access_token_secret, must be a string."
                 )
-
-    def get_oauth_1a(self) -> OAuth1Session:
-        """
-        Gets a user-based OAuth 1.0a session object.
-        Ref: https://developer.twitter.com/en/docs/authentication/oauth-1-0a
-        
-        :returns requests_oauthlib.oauth1_session.OAuth1Session
-        :raises Exception
-        """
         try:
             # Get oauth object
             oauth_1a = OAuth1Session(
-                self._consumer_key,
-                client_secret = self._consumer_secret,
+                self._api_key,
+                client_secret = self._api_key_secret,
                 resource_owner_key = self._access_token,
                 resource_owner_secret = self._access_token_secret
                 )
-            return oauth_1a
-
+            self._oauth_1a = oauth_1a
+            self._use_bearer_token = False
         except:
             raise Exception("Unknown error using the requests_oauthlib.OAuth1Session() method.")
 
@@ -235,6 +215,14 @@ class OsomeTweet:
             raise ValueError("Invalid type for parameter user_fields, must be a string")
 
     # API methods
+    def _make_request(self, endpoint, payload) -> requests.models.Response:
+        url = f"{self._base_url}/{endpoint}"
+        if self._use_bearer_token:
+            return requests.get(url, headers=self._header, params=payload
+            )
+        else:
+            return self._oauth_1a.get(url, params=payload)
+
     # Tweets
     def tweet_lookup(self, tids: Union[str, list, tuple]) -> requests.models.Response:
         """
@@ -257,45 +245,81 @@ class OsomeTweet:
             )
 
         payload.update(self._params)
-        return requests.get(
-            f"{self._base_url}/tweets", headers=self._header, params=payload
-        )
+        response = self._make_request('tweets', payload)
+        return response.json()
 
     # User-Lookup
     def user_lookup_ids(
-        self, 
-        oauth_1a: OAuth1Session,
-        u_ids: Union[list, tuple], 
-        user_fields: Union[list, tuple] = ["id", "name", "username"]) -> requests.models.Response:
+            self,
+            user_ids: Union[list, tuple],
+            user_fields: Union[list, tuple] = ["id", "name", "username"]
+        ) -> dict:
+        return self._user_lookup(user_ids, "id", user_fields=user_fields)
+
+    def user_lookup_usernames(
+            self,
+            usernames: Union[list, tuple],
+            user_fields: Union[list, tuple] = ["id", "name", "username"]
+        ) -> dict:
+
+        cleaned_usernames = []
+        for username in usernames:
+            if username.startswith('@'):
+                cleaned_usernames.append(username[1:])
+            else:
+                cleaned_usernames.append(username)
+        return self._user_lookup(cleaned_usernames, "username", user_fields=user_fields)
+
+    def _user_lookup(
+            self, 
+            query: Union[list, tuple], 
+            query_type: str,
+            user_fields: Union[list, tuple] = ["id", "name", "username"]
+        ) -> dict:
         """
         Looks-up user account information using unique user id numbers. 
         User fields included by default match the default parameters from twitter.
         Ref: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
+         and https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
  
-        :param [str, list, tuple] u_ids - Unique user_id numbers (max 100)
+        :param [list, tuple] query - Unique user ids  or usernames (max 100)
+        :param str query_type - type of the query, can be id or username
         :returns requests.models.Response
         :raises Exception, ValueError
         """
+        query_specs = {
+            "id": {
+                "phrase": "user ids",
+                "parameter_name": "ids",
+                "endpoint": "users"
+            },
+            "username": {
+                "phrase": "usernames",
+                "parameter_name": "usernames",
+                "endpoint": "users/by"
+            }
+        }.get(query_type)
+
         available_user_fields = [
-        "created_at", "description", "entities", "id", 
-        "location", "name", "pinned_tweet_id", "profile_image_url", 
-        "protected", "public_metrics", "url", "username", "verified", "withheld"
+            "created_at", "description", "entities", "id", 
+            "location", "name", "pinned_tweet_id", "profile_image_url", 
+            "protected", "public_metrics", "url", "username", "verified", "withheld"
         ]
 
-        # Check type of u_ids and user_fields 
-        if (isinstance(u_ids, (list, tuple))) and (isinstance(user_fields, (list,tuple))):
+        # Check type of query and user_fields 
+        if (isinstance(query, (list, tuple))) and (isinstance(user_fields, (list,tuple))):
             # Check all provided user fields are in the available set
             if all([x in available_user_fields for x in user_fields]):
                 # Check no more than 100 ids were passed
-                if len(u_ids) <= 100:
+                if len(query) <= 100:
                     # Update payload.
                     payload = {
-                    "ids": f"{','.join(u_ids)}",
+                    query_specs["parameter_name"]: f"{','.join(query)}",
                     "user.fields": f"{','.join(user_fields)}"
                     }
 
                 else:
-                    raise Exception(f"You passed {len(u_ids)} tweet ids. \
+                    raise Exception(f"You passed {len(query)} {query_specs['phrase']}. \
                         This exceeds the maximum for a single query, 100")
 
             else:
@@ -305,7 +329,7 @@ class OsomeTweet:
                     {print(x) for x in available_user_fields}")
         else:
             raise ValueError(
-            "Invalid parameter type. Both `u_ids` and \
+            "Invalid parameter type. Both `query` and \
             `user_fields` must be either a list or tuple."
                 )
 
@@ -313,13 +337,14 @@ class OsomeTweet:
         # building on top of what may have already been set with 
         # set_user_fields()
         payload.update(self._params)
+        
 
         # Pull Data. Wait when necessary and catching time dependent errors.
         switch = True
     
         while switch:
             # Get response
-            response = oauth_1a.get(f"{self._base_url}/users", params=payload)
+            response = self._make_request(query_specs["endpoint"], payload)
         
             # Get number of requests left with our tokens
             remaining_requests = int(response.headers["x-rate-limit-remaining"])
@@ -369,5 +394,4 @@ class OsomeTweet:
             
             # Each time we get a 200 response, lets exit the function and return the response.json
             if response.ok:
-                return response
-        
+                return response.json()
