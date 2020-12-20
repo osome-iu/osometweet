@@ -13,7 +13,8 @@ Date: Dec. 17th 2020
 """
 
 
-# First things first, import the package
+# First things first, import the necessary packages
+import os
 from osometweet.api import OsomeTweet
 
 # Now we can initialize an object w. the of the OsomeTweet class
@@ -54,52 +55,27 @@ that relied on those tokens/keys.
 
 # Set Twitter tokens/keys.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-consumer_key = os.environ.get("CONSUMER_KEY")
-consumer_secret = os.environ.get("CONSUMER_SECRET")
-access_token = os.environ.get("ACCESS_TOKEN")
-access_token_secret = os.environ.get("ACCESS_TOKEN_SECRET")
+api_key = os.environ.get("TWITTER_API_KEY")
+api_key_secret = os.environ.get("TWITTER_API_KEY_SECRET")
+access_token = os.environ.get("TWITTER_ACCESS_TOKEN")
+access_token_secret = os.environ.get("TWITTER_ACCESS_TOKEN_SECRET")
 
-# With these keys/tokens, we can pass them to the OsomeTweet
-# object (ot) by using the below method
-ot.set_oauth_1a_creds(
-    consumer_key=consumer_key,
-    consumer_secret=consumer_secret,
-    access_token=access_token,
-    access_token_secret=access_token_secret
-)
-
-# The keys have been given to the OsomeTweet object (ot),
-# however, with those tokens in the ot object, we can now
-# set up an Oauth1Session by simply calling the below function.
-oauth_1a = ot.get_oauth_1a()
+# With these keys/tokens, we can initialize the OsomeTweet
+# object (ot)
+ot = OsomeTweet(
+    api_key = api_key,
+    api_key_secret = api_key_secret,
+    access_token = access_token,
+    access_token_secret = access_token_secret
+    )
 
 """
-Now with this oauth_1a object, we can begin to pull data
-by using the .user_lookup_ids() method. First, lets take a
-look at the methods docstring...
-~~~
-Signature:
-ot.user_lookup_ids(
-    oauth_1a: requests_oauthlib.oauth1_session.OAuth1Session,
-    u_ids: Union[list, tuple],
-    user_fields: Union[list, tuple] = ['id', 'name', 'username'],
-) -> requests.models.Response
-Docstring:
-Looks-up user account information using unique user id numbers. 
-User fields included by default match the default parameters from twitter.
-Ref: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
+Now we can use the .user_lookup_ids() method to pull data.
 
-:param [list, tuple] u_ids - Unique user_id numbers (max 100)
-:param [list, tuple] user_fields - Twitter's user.fields parameters.
-:returns requests.models.Response
-:raises Exception, ValueError
-Type:      method
-~~~
+This method utilizes the keys/tokens provided and takes in
+a list (or tuple) of user ids (100 user_ids max), and a 
+list (or tuple) of user_fields (from those available).
 
-So this method takes in an OAuth1Session object (created 
-with the .get_oauth_1a() method), a list (or tuple) of
-user ids (100 user_ids max), and a list (or tuple) of 
-user_fields (from those available via the link above).
 The method defaults to including the user_fields below...
     - id, name, username
 ... because these are the default fields set by Twitter when
@@ -113,9 +89,8 @@ ids2find = ["2244994945", "6253282"]
 
 # Call the function without any additional user_fields
 response = ot.user_lookup_ids(
-    oauth_1a=oauth_1a,
-    u_ids=ids2find
-)
+                user_ids=ids2find
+                )
 
 # To call the function with different user_fields
 # comment out the above code and uncomment the
@@ -127,17 +102,15 @@ response = ot.user_lookup_ids(
 #     "entities", "public_metrics"
 # ]
 # response = ot.user_lookup_ids(
-#     oauth_1a=oauth_1a,
-#     u_ids=ids2find,
-#     user_fields=new_user_fields
-# )
+#                 user_ids=ids2find,
+#                 user_fields=new_user_fields
+#                 )
 
 # The .user_lookup_ids() method utilizes the response
-# package to communicate with twitter, so it returns a
-# response object. There is a lot of different
-# information in this object, but the data can be found
-# by doing the following
-data = response.json()["data"]
+# package to communicate with twitter, and it returns a
+# the response.json() object. We find the data object 
+# by calling...
+data = response["data"]
 
 # The data object above is a list of dictionaries. Thus,
 # we can iterate through the data returned for each user

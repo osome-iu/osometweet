@@ -6,6 +6,7 @@
 Purpose: Script to scrape Twitter users account information 
 with the Twitters V2 user_lookup endpoint. Takes a 
 file of user IDs as input.
+
 Author: Matthew DeVerna
 Date: Dec. 17th 2020
 """
@@ -13,12 +14,16 @@ Date: Dec. 17th 2020
 
 # Import packages
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+import sys
 import argparse
-from osometweet.api import OsomeTweet
 import os
+from osometweet.api import OsomeTweet
+from osometweet.utils import chunker
 import json
 from tqdm import tqdm
 from datetime import datetime as dt
+
+
 
 # Set CLI Arguments.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,21 +50,14 @@ file = args.file
 
 # Set Twitter tokens/keys.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-consumer_key = os.environ.get("CONSUMER_KEY")
-consumer_secret = os.environ.get("CONSUMER_SECRET")
-access_token = os.environ.get("ACCESS_TOKEN")
-access_token_secret = os.environ.get("ACCESS_TOKEN_SECRET")
+api_key = os.environ.get("TWITTER_API_KEY")
+api_key_secret = os.environ.get("TWITTER_API_KEY_SECRET")
+access_token = os.environ.get("TWITTER_ACCESS_TOKEN")
+access_token_secret = os.environ.get("TWITTER_ACCESS_TOKEN_SECRET")
 
 
-# Create fFnctions.
+# Create Functions.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def chunker(seq, size):
-    # A function which turns one list into a list of many lists that
-    # are of length `size` or shorter (the last one)
-        # This returns a list of lists
-    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
-
-
 def load_users(file):
     # Load all users, return a list of lists, each 100
     # users long.
@@ -70,24 +68,21 @@ def load_users(file):
         users = [x.strip('\n') for x in f.readlines()]
 
     max_query_length = 100
-    chunked_user_list = list(chunker(users, max_query_length))
+    chunked_user_list = chunker(
+        seq = users,
+        size = max_query_length
+        )
     return chunked_user_list
 
 
 def gather_data():
     # Initialize
-    ot = OsomeTweet()
-
-    # Authorize API and return `oauth` object
-    ot.set_oauth_1a_creds(
-        consumer_key=consumer_key,
-        consumer_secret=consumer_secret,
-        access_token=access_token,
-        access_token_secret=access_token_secret
-    )
-
-    # Get oauth_1a object
-    oauth_1a = ot.get_oauth_1a()
+    ot = OsomeTweet(
+        api_key = api_key,
+        api_key_secret = api_key_secret,
+        access_token = access_token,
+        access_token_secret = access_token_secret
+        )
 
     # Add all user_fields
     user_fields = [
@@ -109,14 +104,13 @@ def gather_data():
         # Iterate through the list of lists, starting a tqdm timer
         for one_hundred_users in tqdm(list_of_user_lists):
             response = ot.user_lookup_ids(
-                oauth_1a=oauth_1a,
-                u_ids=one_hundred_users,
+                user_ids=one_hundred_users,
                 user_fields=user_fields
             )
 
             # Get data and errors
-            data = response.json()["data"]
-            errors = response.json()["errors"]
+            data = response["data"]
+            errors = response["errors"]
 
             # No matter what `data` and `errors` will return, however, they may return `None`.
             try:
