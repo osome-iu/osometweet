@@ -6,6 +6,7 @@
 Purpose: Script to scrape Twitter users account information 
 with the Twitters V2 user_lookup endpoint. Takes a 
 file of user IDs as input.
+
 Author: Matthew DeVerna
 Date: Dec. 17th 2020
 """
@@ -57,13 +58,6 @@ access_token_secret = os.environ.get("TWITTER_ACCESS_TOKEN_SECRET")
 
 # Create Functions.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def chunker(seq, size):
-    # A function which turns one list into a list of many lists that
-    # are of length `size` or shorter (the last one)
-        # This returns a list of lists
-    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
-
-
 def load_users(file):
     # Load all users, return a list of lists, each 100
     # users long.
