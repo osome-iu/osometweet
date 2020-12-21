@@ -186,8 +186,10 @@ print(response["data"])
 ```
 which returns a list of dictionaries, where each dictionary contains the requested information for an individual user.
 ```python
-[{'id': '2244994945', 'name': 'Twitter Dev', 'username': 'TwitterDev'},
- {'id': '6253282', 'name': 'Twitter API', 'username': 'TwitterAPI'}]
+[
+    {'id': '2244994945', 'name': 'Twitter Dev', 'username': 'TwitterDev'},
+    {'id': '6253282', 'name': 'Twitter API', 'username': 'TwitterAPI'}
+]
 ```
 
 #### Specifying `user.fields`
@@ -203,16 +205,22 @@ print(response["data"])
 ```
 which returns a list of dictionaries, like before, but this time with the fields we requested (as well as the default `name`, `id`, and `username` fields)
 ```python
-[{'created_at': '2013-12-14T04:35:55.000Z',
-  'id': '2244994945',
-  'description': 'The voice of the #TwitterDev team and your official source for updates, news, and events, related to the #TwitterAPI.',
-  'name': 'Twitter Dev',
-  'username': 'TwitterDev'},
- {'created_at': '2007-05-23T06:01:13.000Z',
-  'id': '6253282',
-  'description': 'Tweets about changes and service issues. Follow @TwitterDev\xa0for more.',
-  'name': 'Twitter API',
-  'username': 'TwitterAPI'}]
+[
+    {
+    	'created_at': '2013-12-14T04:35:55.000Z',
+	'id': '2244994945',
+	'description': 'The voice of the #TwitterDev team and your official source for updates, news, and events, related to the #TwitterAPI.',
+	'name': 'Twitter Dev',
+	'username': 'TwitterDev'
+    },
+    {
+    	'created_at': '2007-05-23T06:01:13.000Z',
+	'id': '6253282',
+	'description': 'Tweets about changes and service issues. Follow @TwitterDev\xa0for more.',
+	'name': 'Twitter API',
+	'username': 'TwitterAPI'
+    }
+]
 ```
 
 
@@ -231,16 +239,22 @@ print(response["data"])
 ```
 which returns a list of dictionaries, like before, but this time with the fields we requested
 ```python
-[{'name': 'Twitter Dev',
-  'description': 'The voice of the #TwitterDev team and your official source for updates, news, and events, related to the #TwitterAPI.',
-  'username': 'TwitterDev',
-  'created_at': '2013-12-14T04:35:55.000Z',
-  'id': '2244994945'},
- {'name': 'Twitter API',
-  'description': 'Tweets about changes and service issues. Follow @TwitterDev\xa0for more.',
-  'username': 'TwitterAPI',
-  'created_at': '2007-05-23T06:01:13.000Z',
-  'id': '6253282'}]
+[
+    {
+        'name': 'Twitter Dev',
+	'description': 'The voice of the #TwitterDev team and your official source for updates, news, and events, related to the #TwitterAPI.',
+	'username': 'TwitterDev',
+	'created_at': '2013-12-14T04:35:55.000Z',
+	'id': '2244994945'
+    },
+    {
+        'name': 'Twitter API',
+	'description': 'Tweets about changes and service issues. Follow @TwitterDev\xa0for more.',
+	'username': 'TwitterAPI',
+	'created_at': '2007-05-23T06:01:13.000Z',
+	'id': '6253282'
+    }
+]
 ```
 
 ## Utility Methods (`osometweet.utils`)
@@ -284,8 +298,8 @@ o_utils.pause_until(now_plus_10_with_datetime_object)
 Another reality of working with Twitter data is that you are only allowed to query Twitter with a maximum number of users/tweets/whatever per endpoint. To deal with this, we created the `o_utils.chunker` method which turns a list into a list of smaller lists where the length of those smaller lists are no longer than the user indicated size. For example...
 ```python
 from osometweet import utils as o_util
-my_list = ["user1","user2","user3","user4","user5","user6","user7","user8","user9"]
-chunked_list = o_util.chunker(seq = my_list, size = 2)
+my_list = ["user1", "user2", "user3", "user4", "user5", "user6", "user7", "user8", "user9"]
+chunked_list = o_util.chunker(seq=my_list, size=2)
 print(chunked_list)
 ```
 which returns...
