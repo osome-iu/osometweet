@@ -10,7 +10,7 @@ tests_require = [
 setup(
     name="osometweet",
     version="0.1",
-    description="OSoMe Twitter library for academic researches",
+    description="OSoMe Twitter library for academic researchers",
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="MIT",
@@ -26,8 +26,7 @@ setup(
     packages=["osometweet"],
     install_requires=[
         "requests>=2.24.0",
-        "requests_oauthlib>=1.3.0",
-        "pause"
+        "requests_oauthlib>=1.3.0"
     ],
     tests_require=tests_require,
     python_requires=">=3.5",
