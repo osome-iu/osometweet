@@ -259,7 +259,7 @@ class OsomeTweet:
         User fields included by default match the default parameters returned by Twitter.
         Ref: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
 
-        :param [list, tuple] user_ids - Unique user ids to include in query.
+        :param [list, tuple] user_ids - Unique user ids to include in query. (max 100
         :param [list, tuple] user_fields - The user fields included in returned data. 
           (Default = "id", "name", "username")
 
@@ -279,7 +279,7 @@ class OsomeTweet:
         User fields included by default match the default parameters returned by Twitter.
         Ref: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
 
-        :param [list, tuple] user_ids - Unique user ids to include in query.
+        :param [list, tuple] usernames - Usernames to include in query. (max 100)
         :param [list, tuple] user_fields - The user fields included in returned data.
           (Default = "id", "name", "username")
 
@@ -307,7 +307,7 @@ class OsomeTweet:
         Ref: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
          and https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
  
-        :param [list, tuple] query - Unique user ids  or usernames (max 100)
+        :param [list, tuple] query - Unique user ids or usernames (max 100)
         :param str query_type - type of the query, can be id or username
         :returns requests.models.Response
         :raises Exception, ValueError
