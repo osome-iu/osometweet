@@ -254,6 +254,19 @@ class OsomeTweet:
             user_ids: Union[list, tuple],
             user_fields: Union[list, tuple] = ["id", "name", "username"]
         ) -> dict:
+        """
+        Looks-up user account information using unique user account id numbers.
+        User fields included by default match the default parameters returned by Twitter.
+        Ref: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
+
+        :param [list, tuple] user_ids - Unique user ids to include in query.
+        :param [list, tuple] user_fields - The user fields included in returned data. 
+          (Default = "id", "name", "username")
+
+        :returns requests.models.Response
+
+        :raises Exception, ValueError
+        """
         return self._user_lookup(user_ids, "id", user_fields=user_fields)
 
     def user_lookup_usernames(
@@ -261,7 +274,19 @@ class OsomeTweet:
             usernames: Union[list, tuple],
             user_fields: Union[list, tuple] = ["id", "name", "username"]
         ) -> dict:
+        """
+        Looks-up user account information using account usernames.
+        User fields included by default match the default parameters returned by Twitter.
+        Ref: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
 
+        :param [list, tuple] user_ids - Unique user ids to include in query.
+        :param [list, tuple] user_fields - The user fields included in returned data.
+          (Default = "id", "name", "username")
+
+        :returns requests.models.Response
+
+        :raises Exception, ValueError
+        """
         cleaned_usernames = []
         for username in usernames:
             if username.startswith('@'):
