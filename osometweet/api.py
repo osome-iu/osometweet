@@ -234,7 +234,7 @@ class OsomeTweet:
         :raises Exception, ValueError
         """
         if isinstance(tids, (str)):
-            params = {"ids": tids}
+            payload = {"ids": tids}
         elif isinstance(tids, (list, tuple)):
             if len(tids) > 100:
                 raise Exception("Number of tweet ids exceeds maximum of 100")
