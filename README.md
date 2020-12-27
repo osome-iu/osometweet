@@ -109,6 +109,7 @@ OAuth 2 only requires you bearer token. You can create an `OAuth2` object with t
 
 ```python
 from osometweet import OAuth2
+
 bearer_token = "YOUR_TWITTER_BEARER_TOKEN"
 oauth2 = OAuth2(bearer_token=bearer_token)
 ```
@@ -143,7 +144,7 @@ Account information can be gathered with two different types of queries:
 
 ### Pull account information with `user_id` numbers - `user_lookup_ids()`
 ```python
-from osometweet.api import OsomeTweet
+from osometweet import OsomeTweet, OAuth2
 
 # Initialize the OSoMeTweet object
 bearer_token = "YOUR_TWITTER_BEARER_TOKEN"
