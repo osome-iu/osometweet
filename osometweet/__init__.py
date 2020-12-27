@@ -1,1 +1,1 @@
-from osometweet.api import OsomeTweet
+from osometweet.api import *

@@ -14,28 +14,49 @@ class TestOauth(unittest.TestCase):
     Make sure the oatuh is working
     """
     def test_1a(self):
-        ot = osometweet.OsomeTweet(
+        oauth1a = osometweet.OAuth1a(
             api_key=api_key,
             api_key_secret=api_key_secret,
             access_token=access_token,
             access_token_secret=access_token_secret
         )
         test_tweet_id = '1323314485705297926'
-        resp = ot.tweet_lookup(tids=[test_tweet_id])
+        resp = oauth1a.make_request(
+            'https://api.twitter.com/2/tweets',
+            {"ids": f"{test_tweet_id}"}
+            ).json()
         self.assertEqual(resp['data'][0]['id'], test_tweet_id)
     
+    def test_1a_exception(self):
+        with self.assertRaises(ValueError):
+            osometweet.OAuth1a(api_key=1)
+        with self.assertRaises(ValueError):
+            osometweet.OAuth1a(api_key_secret=1)
+        with self.assertRaises(ValueError):
+            osometweet.OAuth1a(access_token=1)
+        with self.assertRaises(ValueError):
+            osometweet.OAuth1a(access_token_secret=1)
+    
     def test_2(self):
-        ot = osometweet.OsomeTweet(bearer_token=bearer_token)
+        oauth2 = osometweet.OAuth2(bearer_token=bearer_token)
         test_tweet_id = '1323314485705297926'
-        resp = ot.tweet_lookup(tids=[test_tweet_id])
+        resp = oauth2.make_request(
+            'https://api.twitter.com/2/tweets',
+            {"ids": f"{test_tweet_id}"}
+            ).json()
         self.assertEqual(resp['data'][0]['id'], test_tweet_id)
+    
+    def test_2_exception(self):
+        with self.assertRaises(ValueError):
+            osometweet.OAuth2(bearer_token=1)
 
 class TestAPI(unittest.TestCase):
     """
     Test all the API endpoints
     """
     def setUp(self):
-        self.ot = osometweet.OsomeTweet(bearer_token=bearer_token)
+        oauth2 = osometweet.OAuth2(bearer_token=bearer_token)
+        self.ot = osometweet.OsomeTweet(oauth2)
 
     def test_tweet_lookup(self):
         test_tweet_ids = ['1323314485705297926', '1328838299419627525']

@@ -5,40 +5,69 @@ from datetime import datetime
 from requests_oauthlib import OAuth1Session
 from osometweet import utils as o_util
 
-class OsomeTweet:
+class OAuthHandler:
+    def __init__(self):
+        pass
+
+    def make_request(self):
+        pass
+
+
+class OAuth1a(OAuthHandler):
     def __init__(
         self,
-        bearer_token: str = "",
         api_key: str = "",
         api_key_secret: str = "",
         access_token: str = "",
         access_token_secret = "",
-        base_url: str = "https://api.twitter.com/2",
+
     ) -> None:
-        self._bearer_token = bearer_token
-        self._base_url = base_url
-        self._bearer_token = bearer_token
         self._api_key = api_key
         self._api_key_secret = api_key_secret
         self._access_token = access_token
         self._access_token_secret = access_token_secret
-        self._use_bearer_token = True
+        self._set_oauth_1a_creds()
 
-        # Set up oauth based on the parameters
-        # Use bearer token (v2.0) by default
-        if self._bearer_token:
-            self._set_bearer_token()
-        # if bearer token is not present, try v1.0a
-        else:
-            self._set_oauth_1a_creds()
-        
-        # A lot of endpoints can only receive payload paremeters specific
-        # to their endpoint, initializing with all of the different objects
-        # will lead to a 401 error if we have unnecessary objects so we can
-        # solve this simply by initializing with an empty dictionary
-        # and updating self._params for each method.
-        self._params = {}
+    def _set_oauth_1a_creds(self) -> None:
+        """
+        Sets the user-based OAuth 1.0a tokens.
+        Ref: https://developer.twitter.com/en/docs/authentication/oauth-1-0a
 
+        :raises ValueError
+        """
+        for key_name in ['api_key', 'api_key_secret', 'access_token', 'access_token_secret']:
+            if not isinstance(getattr(self, '_' + key_name), str):
+                raise ValueError(
+                    f"Invalid type for parameter {key_name}, must be a string."
+                    )
+        # Get oauth object
+        self._oauth_1a = OAuth1Session(
+            self._api_key,
+            client_secret = self._api_key_secret,
+            resource_owner_key = self._access_token,
+            resource_owner_secret = self._access_token_secret
+            )
+
+    def make_request(
+        self,
+        url: str,
+        payload: dict
+       ) -> requests.models.Response:
+        return self._oauth_1a.get(url, params=payload)
+
+
+class OAuth2(OAuthHandler):
+    """
+    Class to handle authenticiation through OAuth 2.0 without user context
+    Only bearer token is required for this class
+    """
+    def __init__(
+        self,
+        bearer_token: str= "",
+    ) -> None:
+        self._bearer_token = bearer_token
+        self._set_bearer_token()
+    
     # Setters
     def _set_bearer_token(self) -> None:
         """
@@ -56,44 +85,32 @@ class OsomeTweet:
                 "Invalid type for parameter bearer_token, must be a string"
             )
 
-    def _set_oauth_1a_creds(self) -> None:
-        """
-        Sets the user-based OAuth 1.0a tokens.
-        Ref: https://developer.twitter.com/en/docs/authentication/oauth-1-0a
+    def make_request(
+        self,
+        url: str,
+        payload: dict
+    ) -> requests.models.Response:
+        return requests.get(
+            url,
+            headers=self._header,
+            params=payload
+        )
 
-        :raises ValueError
-        """
-        if not isinstance(self._api_key, str):
-            raise ValueError(
-                "Invalid type for parameter api_key, must be a string."
-                )
 
-        if not isinstance(self._api_key_secret, str):
-            raise ValueError(
-                "Invalid type for parameter api_key_secret, must be a string."
-                )
-
-        if not isinstance(self._access_token, str):
-            raise ValueError(
-                "Invalid type for parameter access_token, must be a string."
-                )
-
-        if not isinstance(self._access_token_secret, str):
-            raise ValueError(
-                "Invalid type for parameter access_token_secret, must be a string."
-                )
-        try:
-            # Get oauth object
-            oauth_1a = OAuth1Session(
-                self._api_key,
-                client_secret = self._api_key_secret,
-                resource_owner_key = self._access_token,
-                resource_owner_secret = self._access_token_secret
-                )
-            self._oauth_1a = oauth_1a
-            self._use_bearer_token = False
-        except:
-            raise Exception("Unknown error using the requests_oauthlib.OAuth1Session() method.")
+class OsomeTweet:
+    def __init__(
+        self,
+        oauth: OAuthHandler,
+        base_url: str = "https://api.twitter.com/2",
+    ) -> None:
+        self._oauth = oauth
+        # A lot of endpoints can only receive payload paremeters specific
+        # to their endpoint, initializing with all of the different objects
+        # will lead to a 401 error if we have unnecessary objects so we can
+        # solve this simply by initializing with an empty dictionary
+        # and updating self._params for each method.
+        self._base_url = base_url
+        self._params = {}
 
     def set_base_url(self, base_url: str) -> None:
         """
@@ -214,15 +231,6 @@ class OsomeTweet:
         else:
             raise ValueError("Invalid type for parameter user_fields, must be a string")
 
-    # API methods
-    def _make_request(self, endpoint, payload) -> requests.models.Response:
-        url = f"{self._base_url}/{endpoint}"
-        if self._use_bearer_token:
-            return requests.get(url, headers=self._header, params=payload
-            )
-        else:
-            return self._oauth_1a.get(url, params=payload)
-
     # Tweets
     def tweet_lookup(self, tids: Union[str, list, tuple]) -> requests.models.Response:
         """
@@ -244,8 +252,9 @@ class OsomeTweet:
                 "Invalid type for parameter 'tids', must be a string, list, or tuple"
             )
 
+        url = f"{self._base_url}/tweets"
         payload.update(self._params)
-        response = self._make_request('tweets', payload)
+        response = self._oauth.make_request(url, payload)
         return response.json()
 
     # User-Lookup
@@ -363,13 +372,12 @@ class OsomeTweet:
         # set_user_fields()
         payload.update(self._params)
 
-
         # Pull Data. Wait when necessary and catching time dependent errors.
         switch = True
-    
+        url = f"{self._base_url}/{query_specs['endpoint']}"
         while switch:
             # Get response
-            response = self._make_request(query_specs["endpoint"], payload)
+            response = self._oauth.make_request(url, payload)
         
             # Get number of requests left with our tokens
             remaining_requests = int(response.headers["x-rate-limit-remaining"])
