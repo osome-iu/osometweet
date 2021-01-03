@@ -12,8 +12,10 @@ The Wiki will work as an unofficial archive of knowledge people gather through t
 	* [Tests](#tests)
 	* [How to seek helps and contribute](#how-to-seek-helps-and-contribute)
 * [Example Usage](#example-usage)
+	* [Authorization](#authentication)
+		* [OAuth 1a](#oauth-1a)
+		* [OAuth 2](#oauth-2)
 	* [Initializing the `OsomeTweet` class](#initializing-the-osometweet-class)
-		* [Controlling which authorization type you'd like to use](#controlling-which-authorization-type-youd-like-to-use)
 	* [Pulling a User's Account Information](#pulling-a-users-account-information)
 		* [Pull account information with user_id numbers - `user_lookup_ids()`](#pull-account-information-with-user_id-numbers---user_lookup_ids)
 			* [Specifying `user.fields`](#specifying-userfields)
@@ -118,7 +120,8 @@ oauth2 = OAuth2(bearer_token=bearer_token)
 > [Return to top of page](#contents)
 
 Before making use of `osometweet` to gather data, you must first initialize the `OsomeTweet` class. When initializing the `OsomeTweet` class, you must provide a valid OAuth object in order to access Twitter's data.
-In the rest of the document, we will use `OAuth2` by default, but you can replace it with `OAuth1a`.
+
+>NOTE: In the rest of the document, we will use `OAuth2` by default, but you can replace it with `OAuth1a`.
 
 ```python
 from osometweet import OAuth2, OsomeTweet
@@ -233,7 +236,7 @@ which returns a list of dictionaries, like before, but this time with the fields
 ## Utility Methods (`osometweet.utils`)
 > [Return to top of page](#contents)
 
-We also include a few utility methods which will (hopefully) make working with the new Twitter API structure a bit more useful.
+We also include a few utility methods which will (hopefully) make working with the new Twitter API structure a bit easier.
 
 First, you can import the utility methods into your environment with the following code...
 
