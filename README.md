@@ -2,7 +2,7 @@
 
 # Introduction
 
-The OSoMeTweet project intends to provide a set of tools to help the researchers work with the V2 API of Twitter.
+The OSoMeTweet project intends to provide a set of tools to help researchers work with the V2 API of Twitter.
 The Wiki will work as an unofficial archive of knowledge people gather through the process.
 
 # Contents
@@ -105,7 +105,7 @@ api_key_secret = os.environ.get("TWITTER_API_KEY_SECRET")
 This is valuable because you can then leave your keys/tokens - which should always be kept private - out of your code. This allows you to write code which is easier to share with others.
 
 ### OAuth 2
-OAuth 2 only requires you bearer token. You can create an `OAuth2` object with the folliwng code:
+OAuth 2 only requires your bearer token. You can create an `OAuth2` object with the folliwng code:
 
 ```python
 from osometweet import OAuth2
