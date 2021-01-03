@@ -61,28 +61,35 @@ OSoMeTweet will be a community project. **If you encounter bugs, please create [
 
 # Example Usage
 
-## Initializing the `OsomeTweet` class
+## Authentication
 > [Return to top of page](#contents)
 
-Before making use of `osometweet` to gather data, you must first initialize the `OsomeTweet` class. When initializing the `OsomeTweet` class, you must also provide `osometweet` your Twitter credentials in order to access Twitter's data. See below for an example:
+Before you can gather any data from Twitter, you must create an authentication object.
+
+There are two different types of Oauth methods, namely [OAuth 1.0a](https://developer.twitter.com/en/docs/authentication/oauth-1-0a) (User Context) and [OAuth 2.0 Bearer Token](https://developer.twitter.com/en/docs/authentication/oauth-2-0) (App Context). 
+The rate limit is based on the authentication type you choose. 
+The best place to see these comparisons is under the _Migrate_ pages for a given endpoint in Twitter's documentation. Here is an example for the [User Lookup endpoints](https://developer.twitter.com/en/docs/twitter-api/users/lookup/migrate).
+
+### OAuth 1a
+OAuth 1a requires your user context Twitter keys/tokens (i.e. `api_key`, `api_key_secret`, `access_token`, `access_token_secret`).
+You can create an `OAuth1a` object using the following code:
 
 ```python
-from osometweet.api import OsomeTweet
+from osometweet import OAuth1a
 
 api_key = "YOUR_TWITTER_API_KEY"
 api_key_secret = "YOUR_TWITTER_API_KEY_SECRET"
 access_token = "YOUR_TWITTER_ACCESS_TOKEN"
 access_token_secret = "YOUR_TWITTER_ACCESS_TOKEN_SECRET"
-bearer_token = "YOUR_TWITTER_BEARER_TOKEN"
 
-ot = OsomeTweet(
-	api_key = api_key,
-	api_key_secret = api_key_secret,
-	access_token = access_token,
-	access_token_secret = access_token_secret,
-	bearer_token = bearer_token
-	)
+oauth1a = OAuth1a(
+	api_key=api_key,
+	api_key_secret=api_key_secret,
+	access_token=access_token,
+	access_token_secret=access_token_secret
+)
 ```
+
 **Hint:** You can set your Twitter credentials in your terminal by using the `export` command like so...
 ```bash
 export 'TWITTER_API_KEY'='YOUR_TWITTER_API_KEY'
@@ -96,55 +103,32 @@ api_key_secret = os.environ.get("TWITTER_API_KEY_SECRET")
 ...
 ```
 This is valuable because you can then leave your keys/tokens - which should always be kept private - out of your code. This allows you to write code which is easier to share with others.
-> **NOTE:** There are two different types of Oauth methods. [OAuth 1.0a](https://developer.twitter.com/en/docs/authentication/oauth-1-0a) (User Context) and [OAuth 2.0 Bearer Token](https://developer.twitter.com/en/docs/authentication/oauth-2-0) (App Context). **`osometweet` utilizes the OAuth 2.0 Bearer Token by default. This matters because, for certain endpoints, how many requests you can make during a given period of time changes based on which type of authorization you are using**. The best place to see these comparisons is under the _Migrate_ pages for a given endpoint in Twitter's documentation. Here is an example for the [User Lookup endpoints](https://developer.twitter.com/en/docs/twitter-api/users/lookup/migrate).
 
-### Controlling which authorization type you'd like to use
-As mentioned above, `osometweet` defaults to OAuth 2.0 Bearer Token authorization. If you'd like to use OAuth 1.0a authorization you can do that in two ways. 
+### OAuth 2
+OAuth 2 only requires you bearer token. You can create an `OAuth2` object with the folliwng code:
 
-1. **Don't provide the `OsomeTweet` class your `bearer_token`** 
-    * `osometweet` needs your `bearer_token` for OAuth 2.0 Bearer Token authorization. Thus, if you do not provide this token, `osometweet` will look for your `bearer_token` - not find it - and then only use your user context Twitter keys/tokens (i.e. `api_key`, `api_key_secret`, `access_token`, `access_token_secret`) from then on. For example, simply initialize the `OsomeTweet` class like this...
 ```python
-from osometweet.api import OsomeTweet
+from osometweet import OAuth2
 
-api_key = "YOUR_TWITTER_API_KEY"
-api_key_secret = "YOUR_TWITTER_API_KEY_SECRET"
-access_token = "YOUR_TWITTER_ACCESS_TOKEN"
-access_token_secret = "YOUR_TWITTER_ACCESS_TOKEN_SECRET"
-
-ot = OsomeTweet(
-	api_key = api_key,
-	api_key_secret = api_key_secret,
-	access_token = access_token,
-	access_token_secret = access_token_secret
-	)
-```
-
-2. **Manually**
-	* Perhaps you have a more complicated script and you'd like to switch which authorization `osometweet` uses for different methods. You can manually do this by controlling what `osometweet` does with `OsomeTweet._use_bearer_token` (boolean). For example:
-```python
-from osometweet.api import OsomeTweet
-
-api_key = "YOUR_TWITTER_API_KEY"
-api_key_secret = "YOUR_TWITTER_API_KEY_SECRET"
-access_token = "YOUR_TWITTER_ACCESS_TOKEN"
-access_token_secret = "YOUR_TWITTER_ACCESS_TOKEN_SECRET"
 bearer_token = "YOUR_TWITTER_BEARER_TOKEN"
-
-ot = OsomeTweet(
-	api_key = api_key,
-	api_key_secret = api_key_secret,
-	access_token = access_token,
-	access_token_secret = access_token_secret,
-	bearer_token = bearer_token
-	)
-
-# The below line tells osometweet to NOT use the bearer_token even though it has been provided
-ot._use_bearer_token = False  # <-------
-
-# You can then switch it back with...
-ot._use_bearer_token = True
+oauth2 = OAuth2(bearer_token=bearer_token)
 ```
-> **WARNING**: `OsomeTweet._use_bearer_token` can only be set to the boolean values `True` or `False` - any other value will break the class.
+
+## Initializing the `OsomeTweet` class
+> [Return to top of page](#contents)
+
+Before making use of `osometweet` to gather data, you must first initialize the `OsomeTweet` class. When initializing the `OsomeTweet` class, you must provide a valid OAuth object in order to access Twitter's data.
+In the rest of the document, we will use `OAuth2` by default, but you can replace it with `OAuth1a`.
+
+```python
+from osometweet import OAuth2, OsomeTweet
+
+bearer_token = "YOUR_TWITTER_BEARER_TOKEN"
+oauth2 = OAuth2(bearer_token=bearer_token)
+ot = OsomeTweet(oauth2)
+```
+
+Now you can use the `ot` instance to query the API.
 
 ## Pulling a User's Account Information
 > [Return to top of page](#contents)
@@ -158,24 +142,14 @@ Account information can be gathered with two different types of queries:
 **We can query Twitter with up to 100 user IDs or usernames per query. Here's what it looks like to pull two user IDs with the `.user_lookup_ids()` method, which requires we pass it a `list` (or `tuple`) of account user IDs.**
 
 
-
 ### Pull account information with `user_id` numbers - `user_lookup_ids()`
 ```python
-from osometweet.api import OsomeTweet
+from osometweet import OsomeTweet, OAuth2
 
-# !!! We use the user context authorization method here because
-# !!! we can make more requests that way.
-api_key = "YOUR_TWITTER_API_KEY"
-api_key_secret = "YOUR_TWITTER_API_KEY_SECRET"
-access_token = "YOUR_TWITTER_ACCESS_TOKEN"
-access_token_secret = "YOUR_TWITTER_ACCESS_TOKEN_SECRET"
-
-ot = OsomeTweet(
-	api_key = api_key,
-	api_key_secret = api_key_secret,
-	access_token = access_token,
-	access_token_secret = access_token_secret
-	)
+# Initialize the OSoMeTweet object
+bearer_token = "YOUR_TWITTER_BEARER_TOKEN"
+oauth2 = OAuth2(bearer_token=bearer_token)
+ot = OsomeTweet(oauth2)
 
 # Set some test IDs (these are Twitter's own accounts)
 ids2find = ["2244994945", "6253282"]
@@ -207,14 +181,14 @@ which returns a list of dictionaries, like before, but this time with the fields
 ```python
 [
     {
-    	'created_at': '2013-12-14T04:35:55.000Z',
+    'created_at': '2013-12-14T04:35:55.000Z',
 	'id': '2244994945',
 	'description': 'The voice of the #TwitterDev team and your official source for updates, news, and events, related to the #TwitterAPI.',
 	'name': 'Twitter Dev',
 	'username': 'TwitterDev'
     },
     {
-    	'created_at': '2007-05-23T06:01:13.000Z',
+    'created_at': '2007-05-23T06:01:13.000Z',
 	'id': '6253282',
 	'description': 'Tweets about changes and service issues. Follow @TwitterDev\xa0for more.',
 	'name': 'Twitter API',
@@ -222,7 +196,6 @@ which returns a list of dictionaries, like before, but this time with the fields
     }
 ]
 ```
-
 
 
 ### Pull account information with `username`s - `user_lookup_usernames()`
@@ -241,14 +214,14 @@ which returns a list of dictionaries, like before, but this time with the fields
 ```python
 [
     {
-        'name': 'Twitter Dev',
+    'name': 'Twitter Dev',
 	'description': 'The voice of the #TwitterDev team and your official source for updates, news, and events, related to the #TwitterAPI.',
 	'username': 'TwitterDev',
 	'created_at': '2013-12-14T04:35:55.000Z',
 	'id': '2244994945'
     },
     {
-        'name': 'Twitter API',
+    'name': 'Twitter API',
 	'description': 'Tweets about changes and service issues. Follow @TwitterDev\xa0for more.',
 	'username': 'TwitterAPI',
 	'created_at': '2007-05-23T06:01:13.000Z',
