@@ -11,7 +11,7 @@ bearer_token = os.environ.get("BEARER_TOKEN")
 
 class TestOauth(unittest.TestCase):
     """
-    Make sure the oatuh is working
+    Make sure the oauth is working
     """
     def test_1a(self):
         oauth1a = osometweet.OAuth1a(
