@@ -35,7 +35,8 @@ class OAuth1a(OAuthHandler):
         Sets the user-based OAuth 1.0a tokens.
         Ref: https://developer.twitter.com/en/docs/authentication/oauth-1-0a
 
-        :raises ValueError
+        Raises:
+            - Exception, ValueError
         """
         for key_name in ['api_key', 'api_key_secret', 'access_token', 'access_token_secret']:
             if not isinstance(getattr(self, '_' + key_name), str):
@@ -55,6 +56,15 @@ class OAuth1a(OAuthHandler):
         url: str,
         payload: dict
        ) -> requests.models.Response:
+        """
+        Method to make the http request to Twitter API
+
+        Parameters:
+            - url (str) - url of the endpoint
+            - payload (dict) - payload of the request
+        Returns:
+            - requests.models.Response
+        """
         return self._oauth_1a.get(url, params=payload)
 
 
@@ -76,9 +86,8 @@ class OAuth2(OAuthHandler):
         Sets the bearer token, which authenticates the user using OAuth 2.0.
         Ref: https://developer.twitter.com/en/docs/authentication/oauth-2-0/bearer-tokens
         
-        :param str bearer_token
-        :returns None
-        :raises ValueError
+        Raises: 
+            - Exception, ValueError
         """
         if isinstance(self._bearer_token, str):
             self._header = {"Authorization": f"Bearer {self._bearer_token}"}
@@ -92,6 +101,15 @@ class OAuth2(OAuthHandler):
         url: str,
         payload: dict
     ) -> requests.models.Response:
+        """
+        Method to make the http request to Twitter API
+
+        Parameters:
+            - url (str) - url of the endpoint
+            - payload (dict) - payload of the request
+        Returns:
+            - requests.models.Response
+        """
         return requests.get(
             url,
             headers=self._header,
@@ -118,15 +136,18 @@ class OsomeTweet:
         """
         Sets the APIs base URL. The URL for API v2 is https://api.twitter.com/2/<endpoint>
                 
-        :param str base_url
-        :returns None
-        :raises ValueError
+        Parameters:
+            - base_url (str) - base url of the api
+        Returns:
+            - None
+        Raises:
+            - ValueError
         """
         if isinstance(base_url, str):
             self._base_url = base_url
         else:
             raise ValueError("Invalid type for parameter base_url, must be a string")
-
+            
     # Tweets
     def tweet_lookup(
             self,
@@ -163,13 +184,12 @@ class OsomeTweet:
             - user_fields: (list, tuple) - additional fields to return
             in the user object. User field objects not returned unless
             explicitly included. (default = None)
-
         Returns:
             requests.models.Response
-
         Raises:
             - Exception
             - ValueError
+
         """
         if isinstance(tids, (str)):
             payload = {"ids": tids}
@@ -468,13 +488,14 @@ class OsomeTweet:
         User fields included by default match the default parameters returned by Twitter.
         Ref: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
 
-        :param [list, tuple] user_ids - Unique user ids to include in query. (max 100
-        :param [list, tuple] user_fields - The user fields included in returned data. 
-          (Default = "id", "name", "username")
-
-        :returns requests.models.Response
-
-        :raises Exception, ValueError
+        Parameters:
+            - user_ids (list, tuple) - unique user ids to include in query (max 100)
+            - user_fields (list, tuple) - the user fields included in returned data. 
+            (Default = "id", "name", "username")
+        Returns:
+            - requests.models.Response
+        Raises:
+            - Exception, ValueError
         """
         return self._user_lookup(user_ids, "id", user_fields=user_fields)
 
@@ -488,13 +509,14 @@ class OsomeTweet:
         User fields included by default match the default parameters returned by Twitter.
         Ref: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
 
-        :param [list, tuple] usernames - Usernames to include in query. (max 100)
-        :param [list, tuple] user_fields - The user fields included in returned data.
-          (Default = "id", "name", "username")
-
-        :returns requests.models.Response
-
-        :raises Exception, ValueError
+        Parameters:
+            - usernames (list, tuple) - usernames to include in query (max 100)
+            - user_fields (list, tuple) - the user fields included in returned data. 
+            (Default = "id", "name", "username")
+        Returns:
+            - requests.models.Response
+        Raises:
+            - Exception, ValueError
         """
         cleaned_usernames = []
         for username in usernames:
@@ -516,10 +538,13 @@ class OsomeTweet:
         Ref: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
          and https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
  
-        :param [list, tuple] query - Unique user ids or usernames (max 100)
-        :param str query_type - type of the query, can be id or username
-        :returns requests.models.Response
-        :raises Exception, ValueError
+        Parameters:
+            - query (list, tuple) - unique user ids or usernames (max 100)
+            - query_type (str) - type of the query, can be "id" or "username"
+        Returns:
+            - requests.models.Response
+        Raises:
+            - Exception, ValueError
         """
         query_specs = {
             "id": {
