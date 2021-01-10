@@ -87,6 +87,7 @@ class TestAPI(unittest.TestCase):
         )
         self.assertEqual(10, len(resp_2['data']))
 
+
     def test_get_following(self):
         resp = self.ot.get_following('12')
         self.assertEqual(resp['meta']['result_count'], len(resp['data']))
@@ -97,6 +98,122 @@ class TestAPI(unittest.TestCase):
             max_results=10
         )
         self.assertEqual(10, len(resp_2['data']))
+
+
+class TestUtils(unittest.TestCase):
+    """
+    Test all the utils endpoints
+    """
+
+    ### Two tests for the chunker method ###
+    def test_chunker(self):
+        test_list = [1,2,3,4,5,6,7,8,9]
+        chunk_sizes = [2,3]
+        correct_responses = [
+        [[1, 2], [3, 4], [5, 6], [7, 8],
+        [9]],[[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        ]
+        zipper = zip(chunk_sizes, correct_responses)
+        for chunk_size, correct_resp in zipper:
+            resp = osometweet.utils.chunker(
+                seq = test_list,
+                size = chunk_size
+                )
+            self.assertEqual(resp, correct_resp)
+
+    ### Test return object fields methods ###
+    def test_rt_user_fields(self):
+        """Test return user fields method"""
+        correct_fields = [
+            "created_at",
+            "description",
+            "entities",
+            "id",
+            "location",
+            "name",
+            "pinned_tweet_id",
+            "profile_image_url",
+            "protected",
+            "public_metrics",
+            "url",
+            "username",
+            "verified",
+            "withheld"
+        ]
+        fields = osometweet.utils.ObjectFields.return_user_fields()
+        self.assertEqual(fields, correct_fields)
+
+    def test_rt_tweet_fields(self):
+        """Test return tweet fields method"""
+        correct_fields = [
+            "attachments",
+            "author_id",
+            "context_annotations",
+            "conversation_id",
+            "created_at",
+            "entities",
+            "geo",
+            "id",
+            "in_reply_to_user_id",
+            "lang",
+            "non_public_metrics",
+            "organic_metrics",
+            "possiby_sensitive",
+            "promoted_metrics",
+            "public_metrics",
+            "referenced_tweets",
+            "reply_settings",
+            "source",
+            "text",
+            "withheld"
+        ]
+        response = osometweet.utils.ObjectFields.return_tweet_fields()
+        self.assertEqual(response, correct_fields)
+
+    def test_rt_media_fields(self):
+        """Test return media fields method"""
+        correct_fields = [
+            "duration_ms",
+            "height",
+            "media_key",
+            "non_public_metrics",
+            "organic_metrics",
+            "preview_image_url",
+            "promoted_metrics",
+            "public_metrics",
+            "type",
+            "width"
+        ]
+        response = osometweet.utils.ObjectFields.return_media_fields()
+        self.assertEqual(response, correct_fields)
+
+    def test_rt_poll_fields(self):
+        """Test return poll fields method"""
+        correct_fields = [
+            "duration_minutes",
+            "end_datetime",
+            "id",
+            "options",
+            "voting_status"
+        ]
+        response = osometweet.utils.ObjectFields.return_poll_fields()
+        self.assertEqual(response, correct_fields)
+
+    def test_rt_place_fields(self):
+        """Test return place fields method"""
+        correct_fields = [
+            "contained_within",
+            "country",
+            "country_code",
+            "full_name",
+            "geo",
+            "id",
+            "name",
+            "place_type",
+        ]
+        response = osometweet.utils.ObjectFields.return_place_fields()
+        self.assertEqual(response, correct_fields)
+
 
 if __name__ == "__main__":
     unittest.main()
