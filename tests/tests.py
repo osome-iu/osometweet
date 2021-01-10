@@ -75,7 +75,28 @@ class TestAPI(unittest.TestCase):
         resp = self.ot.user_lookup_usernames(test_user_usernames)
         for user in resp['data']:
             self.assertIn(user['username'], test_user_usernames) 
+    
+    def test_get_followers(self):
+        resp = self.ot.get_followers('12')
+        self.assertEqual(resp['meta']['result_count'], len(resp['data']))
 
+        resp_2 = self.ot.get_followers(
+            '12',
+            pagination_token=resp['meta']['next_token'],
+            max_results=10
+        )
+        self.assertEqual(10, len(resp_2['data']))
+
+    def test_get_following(self):
+        resp = self.ot.get_following('12')
+        self.assertEqual(resp['meta']['result_count'], len(resp['data']))
+
+        resp_2 = self.ot.get_followers(
+            '12',
+            pagination_token=resp['meta']['next_token'],
+            max_results=10
+        )
+        self.assertEqual(10, len(resp_2['data']))
 
 if __name__ == "__main__":
     unittest.main()
