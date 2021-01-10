@@ -417,4 +417,25 @@ ot = OsomeTweet(oauth2)
 response = ot.get_following(user_id = '12', max_results = 1000)
 ```
 
+### Pagination
+
+`get_followers()` and `get_following()` can return no more than 1,000 results in each query.
+If you need to get more, you can use pagination.
+Here is an example of how to get another 1,000 followers using the `meta.next_token` field from the response of the previous request:
+
+```python
+from osometweet import OsomeTweet, OAuth2
+
+# Initialize the OSoMeTweet object
+bearer_token = "YOUR_TWITTER_BEARER_TOKEN"
+oauth2 = OAuth2(bearer_token=bearer_token)
+ot = OsomeTweet(oauth2)
+
+# Call the function to get "jack"'s 1,000 most recent followers
+response = ot.get_following('12', max_results = 1000)
+
+# Call the function again to get another 1,000 followers:
+response_2 = ot.get_following('12', pagination_token=response['meta']['next_token'], max_results = 1000)
+```
+
 ---
