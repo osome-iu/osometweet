@@ -437,6 +437,6 @@ response = ot.get_following('12', max_results = 1000)
 response_2 = ot.get_following('12', pagination_token=response['meta']['next_token'], max_results = 1000)
 ```
 
-The same technique works for `get_following()` too.
+The same technique works for `get_following()` too. For more information, see the [offical document](https://developer.twitter.com/en/docs/twitter-api/users/follows/introduction).
 
 ---
