@@ -3,7 +3,9 @@ import pause
 from typing import Union
 from datetime import datetime
 from requests_oauthlib import OAuth1Session
-from osometweet import utils as o_util
+import osometweet.utils as o_util
+
+o_fields = o_util.ObjectFields
 
 class OAuthHandler:
     def __init__(self):
@@ -145,143 +147,49 @@ class OsomeTweet:
             self._base_url = base_url
         else:
             raise ValueError("Invalid type for parameter base_url, must be a string")
-
-    def set_expansions(self, expansions: str) -> None:
-        """
-        Sets the expansions that will be included in the JSON response. 
-        Possible values:
-            attachments.poll_ids, attachments.media_keys, author_id, entities.mentions.username,
-            geo.place_id, in_reply_to_user_id, referenced_tweets.id, referenced_tweets.id.author_id
             
-        Ref: https://developer.twitter.com/en/docs/twitter-api/expansions
-        
-        Parameters:
-            - expansions (str) - expnasions for the requests
-        Returns:
-            - None
-        Raises:
-            - ValueError
-        """
-        if isinstance(expansions, str):
-            self._params["expansions"] = expansions.replace(" ", "")
-        else:
-            raise ValueError("Invalid type for parameter expansions, must be a string")
-
-    # Fields
-    # Ref: https://developer.twitter.com/en/docs/twitter-api/fields
-    def set_media_fields(self, media_fields: str) -> None:
-        """
-        Sets the media fields that will be included in the JSON response. 
-        Possible values:
-            duration_ms, height, media_key, preview_image_url, type, url, width,
-            public_metrics, non_public_metrics, organic_metrics, promoted_metrics
-            
-        Parameters: 
-            - media_fields (str) - media fields for the requests
-        Returns:
-            - None
-        Raises:
-            - ValueError
-        """
-        if isinstance(media_fields, str):
-            self._params["media.fields"] = media_fields.replace(" ", "")
-        else:
-            raise ValueError(
-                "Invalid type for parameter media.fields, must be a string"
-            )
-
-    def set_place_fields(self, place_fields: str) -> None:
-        """
-        Sets the place fields that will be included in the JSON response. 
-        Possible values:
-            contained_within, country, country_code, full_name, geo, id, name, place_type
-
-        Parameters:
-            - place_fields (str) - place fields for the requests
-        Returns:
-            - None
-        Raises:
-            - ValueError
-        """
-        if isinstance(place_fields, str):
-            self._params["place.fields"] = place_fields.replace(" ", "")
-        else:
-            raise ValueError(
-                "Invalid type for parameter place.fields, must be a string"
-            )
-
-    def set_poll_fields(self, poll_fields: str) -> None:
-        """
-        Sets the poll fields that will be included in the JSON response. 
-        Possible values:
-            duration_minutes, end_datetime, id, options, voting_status
-            
-        Parameters:
-            - poll_fields (str) - poll fields for the requests
-        Returns:
-            - None
-        Raises:
-            - ValueError
-        """
-        if isinstance(poll_fields, str):
-            self._params["poll_fields"] = poll_fields.replace(" ", "")
-        else:
-            raise ValueError("Invalid type for parameter poll.fields, must be a string")
-
-    def set_tweet_fields(self, tweet_fields: str) -> None:
-        """
-        Sets the tweet fields that will be included in the JSON response. 
-        Possible values:
-            attachments, author_id, context_annotations, conversation_id, created_at,
-            entities, geo, id, in_reply_to_user_id, lang, non_public_metrics, 
-            public_metrics, organic_metrics, promoted_metrics, possibly_sensitive, 
-            referenced_tweets, source, text, withheld
-            
-        Parameters:
-            - tweet_fields (str) - tweet fields for the requests
-        Returns:
-            - None
-        Raises:
-            - ValueError
-        """
-        if isinstance(tweet_fields, str):
-            self._params["tweet.fields"] = tweet_fields.replace(" ", "")
-        else:
-            raise ValueError(
-                "Invalid type for parameter tweet_fields, must be a string"
-            )
-
-    def set_user_fields(self, user_fields: str) -> None:
-        """
-        Sets the user fields that will be included in the JSON response. 
-        Possible values:
-            created_at, description, entities, id, location, name, pinned_tweet_id,
-            profile_image_url, protected, public_metrics, url, username, verified, withheld
-            
-        Parameters:
-            - user_fields (str) - user fileds for the requests
-        Returns:
-            - None
-        Raises:
-            - ValueError
-        """
-        if isinstance(user_fields, str):
-            self._params["user.fields"] = user_fields.replace(" ", "")
-        else:
-            raise ValueError("Invalid type for parameter user_fields, must be a string")
-
     # Tweets
-    def tweet_lookup(self, tids: Union[str, list, tuple]) -> requests.models.Response:
+    def tweet_lookup(
+            self,
+            tids: Union[str, list, tuple],
+            expansions: Union[list, tuple] = None,
+            media_fields: Union[list, tuple] = None,
+            place_fields: Union[list, tuple] = None,
+            poll_fields: Union[list, tuple] = None,
+            tweet_fields: Union[list, tuple] = None,
+            user_fields: Union[list, tuple] = None
+        ) -> requests.models.Response:
         """
         Looks-up at least one tweet using its tweet id.
         Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/api-reference/get-tweets
  
         Parameters:
-            - tids (str, list, tuple) - tweet ids to look up
+            - tids: (str, list, tuple) - Up to 100 unique tweet ids.
+            - expansions: (list, tuple) - Expansions enable requests to
+            expand an ID into a full object in the includes response
+            object. (default = None)
+            - media_fields: (list, tuple) - additional fields to return
+            in the media object. The response will contain the selected
+            fields only if a Tweet contains media attachments.(default = None)
+            - place_fields: (list, tuple) - additional fields to return
+            in the place object. The response will contain the selected
+            fields only if location data is present in any of the response
+            objects.(default = None)
+            - poll_fields: (list, tuple) - additional fields to return
+            in the poll object. The response will contain the selected
+            fields only if a Tweet contains a poll.(default = None)
+            - tweet_fields: (list, tuple) - additional fields to return
+            in the Tweet object. By default, `tweet_lookup` enters a
+            value of None which returns the `id` and `text` fields.
+            - user_fields: (list, tuple) - additional fields to return
+            in the user object. User field objects not returned unless
+            explicitly included. (default = None)
         Returns:
-            - requests.models.Response
+            requests.models.Response
         Raises:
-            - Exception, ValueError
+            - Exception
+            - ValueError
+
         """
         if isinstance(tids, (str)):
             payload = {"ids": tids}
@@ -294,6 +202,162 @@ class OsomeTweet:
                 "Invalid type for parameter 'tids', must be a string, list, or tuple"
             )
 
+        # Include expansions if present
+        if expansions is not None:
+            if isinstance(expansions, (list,tuple)):
+                avail_expansions = [
+                "attachments.poll_ids", "attachments.media_keys", "author_id", 
+                "entities.mentions.username", "geo.place_id", "in_reply_to_user_id",
+                 "referenced_tweets.id", "referenced_tweets.id.author_id"
+                 ]
+                if all([x in avail_expansions for x in expansions]):
+                    if len(expansions) == 1:
+                        self._params.update({
+                            "expansions" : expansions[0]
+                            })
+                    else:
+                        self._params.update({
+                            "expansions" : ",".join(expansions)
+                            })
+                else:
+                    raise Exception(
+                        "One or more of the passed expansions are not valid.\
+                        Use osometweet.utils.ObjectFields methods to check options."
+                        )
+            else:
+                raise ValueError(
+                        "Invalid parameter type. `expansions` must be a\
+                        list or tuple."
+                    )
+
+        # Include media fields if present
+        if media_fields is not None:
+            if isinstance(media_fields, (list,tuple)):
+                avail_media_fields = o_fields.return_media_fields()
+                if all([x in avail_media_fields for x in media_fields]):
+                    if len(media_fields) == 1:
+                        self._params.update({
+                            "media.fields" : media_fields[0]
+                            })
+                    else:
+                        self._params.update({
+                            "media.fields" : ",".join(media_fields)
+                            })
+                else:
+                    raise Exception(
+                        "One or more of the passed media fields are not valid.\
+                        Use osometweet.utils.ObjectFields methods to check options."
+                        )
+            else:
+                raise ValueError(
+                        "Invalid parameter type. `media_fields` must be a\
+                        list or tuple."
+                    )
+
+        # Include place fields if present
+        if place_fields is not None:
+            if isinstance(place_fields, (list,tuple)):
+                avail_place_fields = o_fields.return_place_fields()
+                if all([x in avail_place_fields for x in place_fields]):
+                    if len(place_fields) == 1:
+                        self._params.update({
+                            "place.fields" : place_fields[0]
+                            })
+                    else:
+                        self._params.update({
+                            "place.fields" : ",".join(place_fields)
+                            })
+                else:
+                    raise Exception(
+                        "One or more of the passed place fields are not valid.\
+                        Use osometweet.utils.ObjectFields methods to check options."
+                        )
+            else:
+                raise ValueError(
+                        "Invalid parameter type. `place_fields` must be a\
+                        list or tuple."
+                    )
+
+        # Include poll fields if present
+        if poll_fields is not None:
+            if isinstance(poll_fields, (list,tuple)):
+                avail_poll_fields = o_fields.return_poll_fields()
+                if all([x in avail_poll_fields for x in poll_fields]):
+                    if len(poll_fields) == 1:
+                        self._params.update({
+                            "poll.fields" : poll_fields[0]
+                            })
+                    else:
+                        self._params.update({
+                            "poll.fields" : ",".join(poll_fields)
+                            })
+                else:
+                    raise Exception(
+                        "One or more of the passed poll fields are not valid.\
+                        Use osometweet.utils.ObjectFields methods to check options."
+                        )
+            else:
+                raise ValueError(
+                        "Invalid parameter type. `poll_fields` must be a\
+                        list or tuple."
+                    )
+
+        # Include tweet fields if present
+        if tweet_fields is not None:
+            if isinstance(tweet_fields, (list,tuple)):
+                avail_tweet_fields = o_fields.return_tweet_fields()
+                if all([x in avail_tweet_fields for x in tweet_fields]):
+                    if len(tweet_fields) == 1:
+                        self._params.update({
+                            "tweet.fields" : tweet_fields[0]
+                            })
+                    else:
+                        self._params.update({
+                            "tweet.fields" : ",".join(tweet_fields)
+                            })
+                else:
+                    raise Exception(
+                        "One or more of the passed tweet fields are not valid.\
+                        Use osometweet.utils.ObjectFields methods to check options."
+                        )
+            else:
+                raise ValueError(
+                        "Invalid parameter type. `tweet_fields` must be a\
+                        list or tuple."
+                    )
+
+        # Include user fields if present
+        if user_fields is not None:
+            if isinstance(tweet_fields, (list,tuple)):
+                if "author_id" in expansions:
+                    avail_user_fields = o_fields.return_user_fields()
+                    if all([x in avail_user_fields for x in user_fields]):
+                        if len(user_fields) == 1:
+                            self._params.update({
+                                "user.fields" : user_fields[0]
+                                })
+                        else:
+                            self._params.update({
+                                "user.fields" : ",".join(user_fields)
+                                })
+                    else:
+                        raise Exception(
+                            "One or more of the passed user_fields are not valid.\
+                            Use osometweet.utils.ObjectFields methods to check options."
+                            )
+                else:
+                    raise Exception(
+                        "`author_id` missing from `expansions`.\
+                        `To use the `user_fields` parameter, you must also\
+                        include the `author_id` expansion parameter in\
+                        your request.")
+            else:
+                raise ValueError(
+                        "Invalid parameter type. `tweet_fields` must be a\
+                        list or tuple."
+                    )
+
+        # Set url and update payload with params
         url = f"{self._base_url}/tweets"
         payload.update(self._params)
         response = self._oauth.make_request(url, payload)

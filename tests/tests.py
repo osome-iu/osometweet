@@ -62,7 +62,36 @@ class TestAPI(unittest.TestCase):
         test_tweet_ids = ['1323314485705297926', '1328838299419627525']
         resp = self.ot.tweet_lookup(tids=test_tweet_ids)
         for tweet in resp['data']:
-            self.assertIn(tweet['id'], test_tweet_ids) 
+            self.assertIn(tweet['id'], test_tweet_ids)
+
+    def test_tweet_lookup_extras(self):
+        test_tweet_id = ['1260294888811347969']
+        t_fields = ["attachments","author_id","created_at","public_metrics","source"]
+        expansions = ["attachments.media_keys", "author_id"]
+        user_fields = ["username"]
+        media_fields = ["duration_ms","public_metrics"]
+
+        resp = self.ot.tweet_lookup(
+            tids = test_tweet_id,
+            tweet_fields = t_fields,
+            expansions = expansions,
+            user_fields = user_fields,
+            media_fields = media_fields
+            )
+        # Check tweet fields are included in data object
+        for field in t_fields:
+            self.assertIn(field, resp["data"][0].keys())
+
+        # Check expansions fields are included in data object
+        self.assertIn("media_keys", resp["data"][0]["attachments"])
+        self.assertIn("author_id", resp["data"][0])
+
+        # Check user_fields
+        self.assertIn("name", resp["includes"]["users"][0])
+
+        # Check media_fields
+        for field in media_fields:
+            self.assertIn(field, resp["includes"]["media"][0].keys())
     
     def test_user_lookup_ids(self):
         test_user_ids = ['12', '13']
