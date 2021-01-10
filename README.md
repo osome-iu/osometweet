@@ -24,6 +24,9 @@ The Wiki will work as an unofficial archive of knowledge people gather through t
 		* [`o_utils.pause_until`](#o_utilspause_until)
 		* [`o_utils.chunker`](#o_utilschunker)
 		* [`o_utils.ObjectFields`](#o_utilsobjectfields)
+	* [Pulling Followers and Following](#pulling-followers-and-following)
+		* [Pull Who Follows a Specific `user_id` - `get_followers()`](#pull-who-follows-a-specific-user_id---get_followers)
+		* [Pull Who a `user_id` Follows - `get_following()`](/#pull-who-a-user_id-follows---get_following)
 
 
 # Getting Started
@@ -357,5 +360,83 @@ Twitter V2 Available Tweet Fields:
 ```
 
 The exact same procedure can be utilized for all of the methods listed [here](#o_utilsobjectfields).
+
+
+
+## Pulling Followers and Following
+We can also easily pull who an account follows (following) as well as who follows them (followers).
+
+
+### Pull who follows a specific `user_id` - `get_followers()`
+```python
+from osometweet import OsomeTweet, OAuth2
+
+# Initialize the OSoMeTweet object
+bearer_token = "YOUR_TWITTER_BEARER_TOKEN"
+oauth2 = OAuth2(bearer_token=bearer_token)
+ot = OsomeTweet(oauth2)
+
+# Call the function to get "jack"'s 100 most recent followers
+response = ot.get_followers('12')
+```
+which returns a list of 100 user objects which represent the 100 most recent people who follow the account with `user_id` '12'. 100 users are returned by default, however, you can request up to 1000 users per query - simply include the parameter `max_results = 1000`. For example...
+```python
+from osometweet import OsomeTweet, OAuth2
+
+# Initialize the OSoMeTweet object
+bearer_token = "YOUR_TWITTER_BEARER_TOKEN"
+oauth2 = OAuth2(bearer_token=bearer_token)
+ot = OsomeTweet(oauth2)
+
+# Call the function to get "jack"'s 100 most recent followers
+response = ot.get_followers(user_id = '12', max_results = 1000)
+```
+
+### Pull who a `user_id` follows - `get_following()`
+```python
+from osometweet import OsomeTweet, OAuth2
+
+# Initialize the OSoMeTweet object
+bearer_token = "YOUR_TWITTER_BEARER_TOKEN"
+oauth2 = OAuth2(bearer_token=bearer_token)
+ot = OsomeTweet(oauth2)
+
+# Call the function to get "jack"'s 100 most recent followers
+response = ot.get_following('12')
+```
+which returns a list of 100 user objects represent the 100 most recent people who `user_id` '12' followed. 100 users are returned by default, however, you can request up to 1000 users per query - simply include the parameter `max_results = 1000`. For example...
+```python
+from osometweet import OsomeTweet, OAuth2
+
+# Initialize the OSoMeTweet object
+bearer_token = "YOUR_TWITTER_BEARER_TOKEN"
+oauth2 = OAuth2(bearer_token=bearer_token)
+ot = OsomeTweet(oauth2)
+
+# Call the function to get "jack"'s 100 most recent followers
+response = ot.get_following(user_id = '12', max_results = 1000)
+```
+
+### Pagination
+
+`get_followers()` and `get_following()` return no more than 1,000 results in each request, use pagination if need more
+Here is an example showing how to get another 1,000 followers using the `meta.next_token` field from the response of the previous request:
+
+```python
+from osometweet import OsomeTweet, OAuth2
+
+# Initialize the OSoMeTweet object
+bearer_token = "YOUR_TWITTER_BEARER_TOKEN"
+oauth2 = OAuth2(bearer_token=bearer_token)
+ot = OsomeTweet(oauth2)
+
+# Call the function to get "jack"'s 1,000 most recent followers
+response = ot.get_following('12', max_results = 1000)
+
+# Call the function again to get another 1,000 followers:
+response_2 = ot.get_following('12', pagination_token=response['meta']['next_token'], max_results = 1000)
+```
+
+The same technique works for `get_following()` too. For more information, see the [offical document](https://developer.twitter.com/en/docs/twitter-api/users/follows/introduction).
 
 ---
