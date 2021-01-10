@@ -257,6 +257,118 @@ class OsomeTweet:
         response = self._oauth.make_request(url, payload)
         return response.json()
 
+    def get_followers(
+            self,
+            user_id: str,
+            user_fields: Union[list, tuple] = ["id", "name", "username"]
+        ) -> requests.models.Response:
+        """
+        Return a list of users who are followers of the specified user ID.
+            - Max: 1000 user objects per query
+            - Default: 100 user objects per query
+        https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-followers
+
+        Parameters:
+            - user_id (str) - Unique user ID to include in the query
+            - user_fields (list, tuple) - The user fields included in returned data.
+            (Default = "id", "name", "username")
+
+        Returns:
+            requests.models.Response
+
+        Raises:
+            - Exception
+            - ValueError
+        """
+
+        available_user_fields = [
+            "created_at", "description", "entities", "id",
+            "location", "name", "pinned_tweet_id", "profile_image_url",
+            "protected", "public_metrics", "url", "username", "verified", "withheld"
+        ]
+
+        # Check type of query and user_fields
+        if (isinstance(user_id, str)) and (isinstance(user_fields, (list,tuple))):
+            # Check all provided user fields are in the available set
+            if all([x in available_user_fields for x in user_fields]):
+                # Insert user_ids into urls
+                url = "{}/users/{}/followers".format(self._base_url, user_id)
+                # Update payload.
+                payload = {
+                "user.fields": f"{','.join(user_fields)}"
+                }
+
+            else:
+                raise Exception(
+                    f"Invalid user_field(s) provided. Please make sure \
+                    they are one of the following fields:\n\n \
+                    {print(x) for x in available_user_fields}")
+        else:
+            raise ValueError(
+            "Invalid parameter type. Both `user_ids` and \
+            `user_fields` must be either a list or tuple."
+                )
+
+        payload.update(self._params)
+        response = self._oauth.make_request(url, payload)
+        return response.json()
+
+    def get_following(
+            self,
+            user_id: str,
+            user_fields: Union[list, tuple] = ["id", "name", "username"]
+        ) -> requests.models.Response:
+        """
+        Return a list of users the specified user ID is following.
+            - Max: 1000 user objects per query
+            - Default: 100 user objects per query
+        https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-following
+
+        Parameters:
+            - user_id (str) - Unique user ID to include in the query
+            - user_fields (list, tuple) - The user fields included in returned data.
+            (Default = "id", "name", "username")
+
+        Returns:
+            requests.models.Response
+
+        Raises:
+            - Exception
+            - ValueError
+        """
+
+        available_user_fields = [
+            "created_at", "description", "entities", "id",
+            "location", "name", "pinned_tweet_id", "profile_image_url",
+            "protected", "public_metrics", "url", "username", "verified", "withheld"
+        ]
+
+        # Check type of query and user_fields
+        if (isinstance(user_id, str)) and (isinstance(user_fields, (list,tuple))):
+            # Check all provided user fields are in the available set
+            if all([x in available_user_fields for x in user_fields]):
+                # Insert user_ids into urls
+                url = "{}/users/{}/following".format(self._base_url, user_id)
+                # Update payload.
+                payload = {
+                "user.fields": f"{','.join(user_fields)}"
+                }
+
+            else:
+                raise Exception(
+                    f"Invalid user_field(s) provided. Please make sure \
+                    they are one of the following fields:\n\n \
+                    {print(x) for x in available_user_fields}")
+        else:
+            raise ValueError(
+            "Invalid parameter type. Both `user_ids` and \
+            `user_fields` must be either a list or tuple."
+                )
+
+        payload.update(self._params)
+        response = self._oauth.make_request(url, payload)
+        return response.json()
+
     # User-Lookup
     def user_lookup_ids(
             self,
