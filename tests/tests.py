@@ -50,6 +50,7 @@ class TestOauth(unittest.TestCase):
         with self.assertRaises(ValueError):
             osometweet.OAuth2(bearer_token=1)
 
+
 class TestAPI(unittest.TestCase):
     """
     Test all the API endpoints
@@ -63,35 +64,6 @@ class TestAPI(unittest.TestCase):
         resp = self.ot.tweet_lookup(tids=test_tweet_ids)
         for tweet in resp['data']:
             self.assertIn(tweet['id'], test_tweet_ids)
-
-    def test_tweet_lookup_extras(self):
-        test_tweet_id = ['1260294888811347969']
-        t_fields = ["attachments","author_id","created_at","public_metrics","source"]
-        expansions = ["attachments.media_keys", "author_id"]
-        user_fields = ["username"]
-        media_fields = ["duration_ms","public_metrics"]
-
-        resp = self.ot.tweet_lookup(
-            tids = test_tweet_id,
-            tweet_fields = t_fields,
-            expansions = expansions,
-            user_fields = user_fields,
-            media_fields = media_fields
-            )
-        # Check tweet fields are included in data object
-        for field in t_fields:
-            self.assertIn(field, resp["data"][0].keys())
-
-        # Check expansions fields are included in data object
-        self.assertIn("media_keys", resp["data"][0]["attachments"])
-        self.assertIn("author_id", resp["data"][0])
-
-        # Check user_fields
-        self.assertIn("name", resp["includes"]["users"][0])
-
-        # Check media_fields
-        for field in media_fields:
-            self.assertIn(field, resp["includes"]["media"][0].keys())
     
     def test_user_lookup_ids(self):
         test_user_ids = ['12', '13']
@@ -129,6 +101,93 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(10, len(resp_2['data']))
 
 
+class TestFields(unittest.TestCase):
+    def setUp(self):
+        oauth2 = osometweet.OAuth2(bearer_token=bearer_token)
+        self.ot = osometweet.OsomeTweet(oauth2)
+
+    # def test_user_fields(self):
+    #     """
+    #     Test user fields. Test case borrowed from
+    #     https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/user
+    #     """
+    #     fields_to_request = [
+    #         "created_at", "description", "entities", "id",
+    #         "location", "name", "pinned_tweet_id", "profile_image_url",
+    #         "protected", "public_metrics", "url", "username",
+    #         "verified", "withheld"
+    #     ]
+    #     user_fields = osometweet.UserFields()
+    #     user_fields.fields = fields_to_request
+    #     resp = self.ot.user_lookup_ids(
+    #         ['2244994945'],
+    #         )
+    #     self.assertEqual(fields, correct_fields)
+
+    def test_tweet_fields(self):
+        """
+        Test tweet fields. Test case borrowed from
+        https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
+        """
+        fields_to_request = [
+            "attachments", "author_id", "context_annotations",
+            "created_at", "entities", "id", "in_reply_to_user_id",
+            "lang", "possibly_sensitive", "public_metrics",
+            "referenced_tweets", "source", "text"
+        ]
+        tweet_fields = osometweet.TweetFields()
+        tweet_fields.fields = fields_to_request
+        resp = self.ot.tweet_lookup(
+            ['1212092628029698048'],
+            fields=tweet_fields
+        )
+        for field in fields_to_request:
+            self.assertIn(field, resp['data'][0])
+
+    # def test_rt_media_fields(self):
+    #     """Test return media fields method"""
+    #     correct_fields = [
+    #         "duration_ms",
+    #         "height",
+    #         "media_key",
+    #         "non_public_metrics",
+    #         "organic_metrics",
+    #         "preview_image_url",
+    #         "promoted_metrics",
+    #         "public_metrics",
+    #         "type",
+    #         "width"
+    #     ]
+    #     response = osometweet.utils.ObjectFields.return_media_fields()
+    #     self.assertEqual(response, correct_fields)
+
+    # def test_rt_poll_fields(self):
+    #     """Test return poll fields method"""
+    #     correct_fields = [
+    #         "duration_minutes",
+    #         "end_datetime",
+    #         "id",
+    #         "options",
+    #         "voting_status"
+    #     ]
+    #     response = osometweet.utils.ObjectFields.return_poll_fields()
+    #     self.assertEqual(response, correct_fields)
+
+    # def test_rt_place_fields(self):
+    #     """Test return place fields method"""
+    #     correct_fields = [
+    #         "contained_within",
+    #         "country",
+    #         "country_code",
+    #         "full_name",
+    #         "geo",
+    #         "id",
+    #         "name",
+    #         "place_type",
+    #     ]
+    #     response = osometweet.utils.ObjectFields.return_place_fields()
+    #     self.assertEqual(response, correct_fields)
+
 class TestUtils(unittest.TestCase):
     """
     Test all the utils endpoints
@@ -149,99 +208,6 @@ class TestUtils(unittest.TestCase):
                 size = chunk_size
                 )
             self.assertEqual(resp, correct_resp)
-
-    ### Test return object fields methods ###
-    def test_rt_user_fields(self):
-        """Test return user fields method"""
-        correct_fields = [
-            "created_at",
-            "description",
-            "entities",
-            "id",
-            "location",
-            "name",
-            "pinned_tweet_id",
-            "profile_image_url",
-            "protected",
-            "public_metrics",
-            "url",
-            "username",
-            "verified",
-            "withheld"
-        ]
-        fields = osometweet.utils.ObjectFields.return_user_fields()
-        self.assertEqual(fields, correct_fields)
-
-    def test_rt_tweet_fields(self):
-        """Test return tweet fields method"""
-        correct_fields = [
-            "attachments",
-            "author_id",
-            "context_annotations",
-            "conversation_id",
-            "created_at",
-            "entities",
-            "geo",
-            "id",
-            "in_reply_to_user_id",
-            "lang",
-            "non_public_metrics",
-            "organic_metrics",
-            "possiby_sensitive",
-            "promoted_metrics",
-            "public_metrics",
-            "referenced_tweets",
-            "reply_settings",
-            "source",
-            "text",
-            "withheld"
-        ]
-        response = osometweet.utils.ObjectFields.return_tweet_fields()
-        self.assertEqual(response, correct_fields)
-
-    def test_rt_media_fields(self):
-        """Test return media fields method"""
-        correct_fields = [
-            "duration_ms",
-            "height",
-            "media_key",
-            "non_public_metrics",
-            "organic_metrics",
-            "preview_image_url",
-            "promoted_metrics",
-            "public_metrics",
-            "type",
-            "width"
-        ]
-        response = osometweet.utils.ObjectFields.return_media_fields()
-        self.assertEqual(response, correct_fields)
-
-    def test_rt_poll_fields(self):
-        """Test return poll fields method"""
-        correct_fields = [
-            "duration_minutes",
-            "end_datetime",
-            "id",
-            "options",
-            "voting_status"
-        ]
-        response = osometweet.utils.ObjectFields.return_poll_fields()
-        self.assertEqual(response, correct_fields)
-
-    def test_rt_place_fields(self):
-        """Test return place fields method"""
-        correct_fields = [
-            "contained_within",
-            "country",
-            "country_code",
-            "full_name",
-            "geo",
-            "id",
-            "name",
-            "place_type",
-        ]
-        response = osometweet.utils.ObjectFields.return_place_fields()
-        self.assertEqual(response, correct_fields)
 
 
 if __name__ == "__main__":
