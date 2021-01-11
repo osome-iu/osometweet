@@ -439,4 +439,135 @@ response_2 = ot.get_following('12', pagination_token=response['meta']['next_toke
 
 The same technique works for `get_following()` too. For more information, see the [offical document](https://developer.twitter.com/en/docs/twitter-api/users/follows/introduction).
 
+## Specifying fields and expansions
+
+V2 API by default only returns limited information.
+To fetuch more, you will need to specify the [`fields`](https://developer.twitter.com/en/docs/twitter-api/fields) and [`expansions`](https://developer.twitter.com/en/docs/twitter-api/expansions) parameters in the request.
+`OSoMeTweet` contains several classes to handle them.
+Following are several examples to show you how to work with them.
+
+### Case 1: I don't need extra fields
+
+If the default fields (see the official documents for what are included by default) are sufficient, you can just ignore the `fields` and `expansions` parameters and use `OSoMeTweet` as introduced above.
+
+### Case 2: Just give me everything
+
+If you need everything, just follow the example below
+
+```python
+import osometweet
+
+# Initialize the OSoMeTweet object
+bearer_token = "YOUR_TWITTER_BEARER_TOKEN"
+oauth2 = osometweet.OAuth2(bearer_token=bearer_token)
+ot = osometweet.OsomeTweet(oauth2)
+
+# Initialize the fields object
+all_fields = osometweet.get_all_avail_fields()
+# Initialize the expansion object
+expansions = osometweet.ObjectExpansions()
+
+# make request
+ot.tweet_lookup('1348419350370398209', fields=all_fields, expansions=expansions)
+```
+
+`fields=all_fields` and `expansions=expansion` work for all the endpoints.
+
+### Case 3: I need to sepcify exactly what I need
+
+`OSoMeTweet` provides the flexibility to specify exactly the API should return.
+Let us use the `tweet_lookup` an example.
+Suppose we are interested in tweet `1212092628029698048`.
+In addition to the default tweet data, we also want to know `created_at` and `public_metrics` of it.
+This can be achieved by specifying the tweet fields;.
+Moreover, we want to know more about the author, so we need to expand `author_id`.
+Note that this way only `name`, `username`, and `id` of the author will be returned following the default setup.
+To access the `created_at` information of the author, we also need to sepcify the user fields.
+
+```python
+import osometweet
+
+# Initialize the OSoMeTweet object
+bearer_token = "YOUR_TWITTER_BEARER_TOKEN"
+oauth2 = osometweet.OAuth2(bearer_token=bearer_token)
+ot = osometweet.OsomeTweet(oauth2)
+
+# Initialize the fields object
+tweet_fields = osometweet.TweetFields()
+# Specify the fields you need explicitly
+tweet_fields.fields = ['public_metrics', 'created_at']
+
+# Initialize the user fields object
+user_fields = osometweet.UserFields()
+# Specify the fields you need explicitly
+user_fields.fields = ['created_at']
+
+# Initialize the expansion object
+expansions = osometweet.ObjectExpansions()
+# Specify the expansions you need explicitly
+expansions.expansions = ["author_id"]
+
+# make request
+ot.tweet_lookup(['1212092628029698048'], fields = tweet_fields+user_fields, expansions=expansions)
+```
+
+### More about fields
+
+Twitter [supports](https://developer.twitter.com/en/docs/twitter-api/fields) fields for `user`, `tweet`, `media`, `poll`, and `place`.
+You can use `UserFields`, `TweetFields`, `MediaFields`, `PollFields`, and `PlaceFields` classes to handle them.
+They only contains the default fields if not specified otherwise.
+
+You can see what optional fields are available by
+
+```python
+tweet_fields = osometweet.TweetFields()
+print(tweet_fields.optional_fields)
+```
+
+You can specify the fields by
+
+```python
+tweet_fields.fields = ['public_metrics', 'created_at']
+```
+
+After specifying the fields, you can check the status by 
+
+```python
+print(tweet_fields.fields)
+```
+
+You can add different fields objects up to get an object that contains all the information, and pass it to the API endpoints
+
+```python
+tweet_fields = osometweet.TweetFields()
+tweet_fields.fields = ['public_metrics', 'created_at']
+
+user_fields = osometweet.UserFields()
+user_fields.fields = ['created_at']
+
+sum_of_fields = tweet_fields + user_fields
+# OR
+sum_of_fields = sum([tweet_fields, user_fields])
+```
+
+#### More about expansions
+
+You can use `ObjectExpansions` to handle the expansions.
+The class includes all available expansions by default.
+
+You can see what expansions are available by 
+
+```python
+expansions = osometweet.ObjectExpansions()
+print(expansions.avail_expansions)
+```
+
+You can specify the expansions by
+
+```python
+expansions.expansions = ["author_id"]
+```
+
+Note that if you expand `author_id`, then there is no need to include it in the fields.
+
 ---
