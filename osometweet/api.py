@@ -43,11 +43,13 @@ class OsomeTweet:
         else:
             raise ValueError("Invalid type for parameter base_url, must be a string")
             
+    ########################################
+    # Tweet endpoints
     def tweet_lookup(
             self,
             tids: Union[str, list, tuple],
             fields: ObjectFields = None,
-            expansions: ObjectExpansions = None
+            expansions: TweetExpansions = None
         ) -> dict:
         """
         Looks-up at least one tweet using its tweet id.
@@ -56,7 +58,7 @@ class OsomeTweet:
         Parameters:
             - tids: (str, list, tuple) - Up to 100 unique tweet ids.
             - fields: (ObjectFields) - additional fields to return. (default = None)
-            - expansions: (ObjectExpansions) - Expansions enable requests to
+            - expansions: (TweetExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
         Returns:
             dict
@@ -78,7 +80,7 @@ class OsomeTweet:
         # Set url and update payload with params
         url = f"{self._base_url}/tweets"
         # Include expansions if present
-        if expansions is not None:
+        if expansions is not None and isinstance(expansions, TweetExpansions):
             payload.update(expansions.expansions_object)
         # Include fields if present
         if fields is not None:
@@ -86,11 +88,13 @@ class OsomeTweet:
         response = self._oauth.make_request(url, payload)
         return response.json()
 
+    ########################################
+    # User endpoints
     def get_followers(
             self,
             user_id: str,
             fields: ObjectFields = None,
-            expansions: ObjectExpansions = None,
+            expansions: UserExpansions = None,
             **kwargs
         ) -> dict:
         """
@@ -102,7 +106,7 @@ class OsomeTweet:
         Parameters:
             - user_id (str) - Unique user ID to include in the query
             - fields: (ObjectFields) - additional fields to return. (default = None)
-            - expansions: (ObjectExpansions) - Expansions enable requests to
+            - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
             - kwargs - for optional arguments like "max_results" and "pagination_token"
         Returns:
@@ -117,7 +121,7 @@ class OsomeTweet:
             self,
             user_id: str,
             fields: ObjectFields = None,
-            expansions: ObjectExpansions = None,
+            expansions: UserExpansions = None,
             **kwargs
         ) -> dict:
         """
@@ -129,7 +133,7 @@ class OsomeTweet:
         Parameters:
             - user_id (str) - Unique user ID to include in the query
             - fields: (ObjectFields) - additional fields to return. (default = None)
-            - expansions: (ObjectExpansions) - Expansions enable requests to
+            - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
             - kwargs - for optional arguments like "max_results" and "pagination_token"
         Returns:
@@ -145,7 +149,7 @@ class OsomeTweet:
             user_id: str,
             endpoint: str,
             fields: ObjectFields = None,
-            expansions: ObjectExpansions = None,
+            expansions: UserExpansions = None,
             **kwargs
         ) -> dict:
         """
@@ -158,7 +162,7 @@ class OsomeTweet:
             - user_id (str) - Unique user ID to include in the query
             - endpoint (str) - valid values are "followers" or "following"
             - fields: (ObjectFields) - additional fields to return. (default = None)
-            - expansions: (ObjectExpansions) - Expansions enable requests to
+            - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
             - kwargs - for optional arguments like "max_results" and "pagination_token"
         Returns:
@@ -176,7 +180,8 @@ class OsomeTweet:
         # Create payload.
         payload = dict()
         payload.update(kwargs)
-        if expansions is not None:
+        # Include expansions if present
+        if expansions is not None and isinstance(expansions, UserExpansions):
             payload.update(expansions.expansions_object)
         # Include fields if present
         if fields is not None:
@@ -185,12 +190,11 @@ class OsomeTweet:
         response = self._oauth.make_request(url, payload)
         return response.json()
 
-    # User-Lookup
     def user_lookup_ids(
             self,
             user_ids: Union[list, tuple],
             fields: ObjectFields = None,
-            expansions: ObjectExpansions = None
+            expansions: UserExpansions = None
         ) -> dict:
         """
         Looks-up user account information using unique user account id numbers.
@@ -202,7 +206,7 @@ class OsomeTweet:
             - user_fields (list, tuple) - the user fields included in returned data. 
             (Default = "id", "name", "username")
             - fields: (ObjectFields) - additional fields to return. (default = None)
-            - expansions: (ObjectExpansions) - Expansions enable requests to
+            - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
         Returns:
             - dict
@@ -215,7 +219,7 @@ class OsomeTweet:
             self,
             usernames: Union[list, tuple],
             fields: ObjectFields = None,
-            expansions: ObjectExpansions = None
+            expansions: UserExpansions = None
         ) -> dict:
         """
         Looks-up user account information using account usernames.
@@ -227,7 +231,7 @@ class OsomeTweet:
             - user_fields (list, tuple) - the user fields included in returned data. 
             (Default = "id", "name", "username")
             - fields: (ObjectFields) - additional fields to return. (default = None)
-            - expansions: (ObjectExpansions) - Expansions enable requests to
+            - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
         Returns:
             - dict
@@ -247,7 +251,7 @@ class OsomeTweet:
             query: Union[list, tuple], 
             query_type: str,
             fields: ObjectFields = None,
-            expansions: ObjectExpansions = None
+            expansions: UserExpansions = None
         ) -> dict:
         """
         Looks-up user account information using unique user id numbers. 
@@ -259,7 +263,7 @@ class OsomeTweet:
             - query (list, tuple) - unique user ids or usernames (max 100)
             - query_type (str) - type of the query, can be "id" or "username"
             - fields: (ObjectFields) - additional fields to return. (default = None)
-            - expansions: (ObjectExpansions) - Expansions enable requests to
+            - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
         Returns:
             - dict
@@ -295,7 +299,7 @@ class OsomeTweet:
             raise Exception(f"You passed {len(query)} {query_specs['phrase']}. \
                 This exceeds the maximum for a single query, 100")
 
-        if expansions is not None:
+        if expansions is not None and isinstance(expansions, UserExpansions):
             payload.update(expansions.expansions_object)
         # Include fields if present
         if fields is not None:
