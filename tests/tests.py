@@ -119,12 +119,20 @@ class TestFields(unittest.TestCase):
         ]
         user_fields = osometweet.UserFields()
         user_fields.fields = fields_to_request
+
         resp = self.ot.user_lookup_ids(
             ['2244994945'],
             fields=user_fields
             )
         for field in fields_to_request:
             self.assertIn(field, resp['data'][0])
+
+        resp_2 = self.ot.user_lookup_usernames(
+            ['TwitterDev'],
+            fields=user_fields
+            )
+        for field in fields_to_request:
+            self.assertIn(field, resp_2['data'][0])
 
     def test_tweet_fields(self):
         """
@@ -152,11 +160,11 @@ class TestExpansions(unittest.TestCase):
         oauth2 = osometweet.OAuth2(bearer_token=bearer_token)
         self.ot = osometweet.OsomeTweet(oauth2)
     
-    def test_expansions(self):
+    def test_tweet_expansions(self):
         expansions_to_request = [
             "attachments.media_keys", "referenced_tweets.id", "author_id"
         ]
-        expansions = osometweet.ObjectExpansions()
+        expansions = osometweet.TweetExpansions()
         expansions.expansions = expansions_to_request
         resp = self.ot.tweet_lookup(
             ['1212092628029698048'],
@@ -167,6 +175,8 @@ class TestExpansions(unittest.TestCase):
         self.assertIn("media_key", resp["includes"]["media"][0])
         self.assertIn("users", resp["includes"])
         self.assertIn("tweets", resp["includes"])
+
+    # The user expansion can't be tested because the user might not have a pinned tweet
 
 
 class TestUtils(unittest.TestCase):

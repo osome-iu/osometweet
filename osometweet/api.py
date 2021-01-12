@@ -3,12 +3,14 @@ import pause
 from typing import Union
 from datetime import datetime
 
-from .oauth import OAuthHandler, OAuth1a, OAuth2
-from .fields import ObjectExpansions, ObjectFields, ObjectFieldsBase, UserFields, TweetFields, MediaFields, PollFields, PlaceFields
+from .oauth import OAuthHandler
+from .fields import ObjectFields, ObjectFieldsBase, UserFields, TweetFields, MediaFields, PollFields, PlaceFields
+from .expansions import ObjectExpansions, TweetExpansions, UserExpansions
 
 from osometweet.utils import get_logger, pause_until
 
 logger = get_logger(__name__)
+
 
 class OsomeTweet:
     def __init__(
@@ -87,7 +89,8 @@ class OsomeTweet:
     def get_followers(
             self,
             user_id: str,
-            user_fields: Union[list, tuple] = ["id", "name", "username"],
+            fields: ObjectFields = None,
+            expansions: ObjectExpansions = None,
             **kwargs
         ) -> dict:
         """
@@ -98,8 +101,9 @@ class OsomeTweet:
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
-            - user_fields (list, tuple) - The user fields included in returned data.
-            (Default = "id", "name", "username")
+            - fields: (ObjectFields) - additional fields to return. (default = None)
+            - expansions: (ObjectExpansions) - Expansions enable requests to
+            expand an ID into a full object in the response. (default = None)
             - kwargs - for optional arguments like "max_results" and "pagination_token"
         Returns:
             dict
@@ -107,12 +111,13 @@ class OsomeTweet:
             - Exception
             - ValueError
         """
-        return self._follows_lookup(user_id, "followers", user_fields, **kwargs)
+        return self._follows_lookup(user_id, "followers", fields=fields, expansions=expansions, **kwargs)
 
     def get_following(
             self,
             user_id: str,
-            user_fields: Union[list, tuple] = ["id", "name", "username"],
+            fields: ObjectFields = None,
+            expansions: ObjectExpansions = None,
             **kwargs
         ) -> dict:
         """
@@ -123,8 +128,9 @@ class OsomeTweet:
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
-            - user_fields (list, tuple) - The user fields included in returned data.
-            (Default = "id", "name", "username")
+            - fields: (ObjectFields) - additional fields to return. (default = None)
+            - expansions: (ObjectExpansions) - Expansions enable requests to
+            expand an ID into a full object in the response. (default = None)
             - kwargs - for optional arguments like "max_results" and "pagination_token"
         Returns:
             dict
@@ -132,13 +138,14 @@ class OsomeTweet:
             - Exception
             - ValueError
         """
-        return self._follows_lookup(user_id, "following", user_fields, **kwargs)
+        return self._follows_lookup(user_id, "following", fields=fields, expansions=expansions, **kwargs)
 
     def _follows_lookup(
             self,
             user_id: str,
             endpoint: str,
-            user_fields: Union[list, tuple] = ["id", "name", "username"],
+            fields: ObjectFields = None,
+            expansions: ObjectExpansions = None,
             **kwargs
         ) -> dict:
         """
@@ -149,9 +156,10 @@ class OsomeTweet:
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
-            - user_fields (list, tuple) - The user fields included in returned data.
-            (Default = "id", "name", "username")
             - endpoint (str) - valid values are "followers" or "following"
+            - fields: (ObjectFields) - additional fields to return. (default = None)
+            - expansions: (ObjectExpansions) - Expansions enable requests to
+            expand an ID into a full object in the response. (default = None)
             - kwargs - for optional arguments like "max_results" and "pagination_token"
         Returns:
             dict
@@ -159,36 +167,21 @@ class OsomeTweet:
             - Exception
             - ValueError
         """
-
-        available_user_fields = [
-            "created_at", "description", "entities", "id",
-            "location", "name", "pinned_tweet_id", "profile_image_url",
-            "protected", "public_metrics", "url", "username", "verified", "withheld"
-        ]
-
         # Check type of query and user_fields
-        if (isinstance(user_id, str)) and (isinstance(user_fields, (list,tuple))):
-            # Check all provided user fields are in the available set
-            if all([x in available_user_fields for x in user_fields]):
-                # Insert user_ids into urls
-                url = f"{self._base_url}/users/{user_id}/{endpoint}"
-                # Update payload.
-                payload = {
-                "user.fields": f"{','.join(user_fields)}"
-                }
-
-            else:
-                raise Exception(
-                    f"Invalid user_field(s) provided. Please make sure \
-                    they are one of the following fields:\n\n \
-                    {print(x) for x in available_user_fields}")
-        else:
-            raise ValueError(
-            "Invalid parameter type. `user_id` must be str and \
-            `user_fields` must be either a list or tuple."
-                )
+        if not isinstance(user_id, str):
+            raise ValueError("Invalid parameter type. `user_id` must be str")
+            
+        # Construct URL
+        url = f"{self._base_url}/users/{user_id}/{endpoint}"
+        # Create payload.
+        payload = dict()
         payload.update(kwargs)
-        payload.update(self._params)
+        if expansions is not None:
+            payload.update(expansions.expansions_object)
+        # Include fields if present
+        if fields is not None:
+            payload.update(fields.fields_object)
+
         response = self._oauth.make_request(url, payload)
         return response.json()
 
