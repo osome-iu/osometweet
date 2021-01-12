@@ -146,50 +146,6 @@ class TestFields(unittest.TestCase):
         for field in fields_to_request:
             self.assertIn(field, resp['data'][0])
 
-    # def test_rt_media_fields(self):
-    #     """Test return media fields method"""
-    #     correct_fields = [
-    #         "duration_ms",
-    #         "height",
-    #         "media_key",
-    #         "non_public_metrics",
-    #         "organic_metrics",
-    #         "preview_image_url",
-    #         "promoted_metrics",
-    #         "public_metrics",
-    #         "type",
-    #         "width"
-    #     ]
-    #     response = osometweet.utils.ObjectFields.return_media_fields()
-    #     self.assertEqual(response, correct_fields)
-
-    # def test_rt_poll_fields(self):
-    #     """Test return poll fields method"""
-    #     correct_fields = [
-    #         "duration_minutes",
-    #         "end_datetime",
-    #         "id",
-    #         "options",
-    #         "voting_status"
-    #     ]
-    #     response = osometweet.utils.ObjectFields.return_poll_fields()
-    #     self.assertEqual(response, correct_fields)
-
-    # def test_rt_place_fields(self):
-    #     """Test return place fields method"""
-    #     correct_fields = [
-    #         "contained_within",
-    #         "country",
-    #         "country_code",
-    #         "full_name",
-    #         "geo",
-    #         "id",
-    #         "name",
-    #         "place_type",
-    #     ]
-    #     response = osometweet.utils.ObjectFields.return_place_fields()
-    #     self.assertEqual(response, correct_fields)
-
 
 class TestExpansions(unittest.TestCase):
     def setUp(self):
