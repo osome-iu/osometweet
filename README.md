@@ -6,30 +6,14 @@ The OSoMeTweet project intends to provide a set of tools to help researchers wor
 The Wiki will work as an unofficial archive of knowledge people gather through the process.
 
 # Contents
-* [Getting Started](#getting-started)
+* [Introduction](#introduction)
 	* [Install the PyPi version](#install-the-pypi-version)
 	* [Local development](#local-development)
 	* [Tests](#tests)
 	* [How to seek helps and contribute](#how-to-seek-helps-and-contribute)
-* [Example Usage](#example-usage)
-	* [Authorization](#authentication)
-		* [OAuth 1a](#oauth-1a)
-		* [OAuth 2](#oauth-2)
-	* [Initializing the `OsomeTweet` class](#initializing-the-osometweet-class)
-	* [Pulling a User's Account Information](#pulling-a-users-account-information)
-		* [Pull account information with user_id numbers - `user_lookup_ids()`](#pull-account-information-with-user_id-numbers---user_lookup_ids)
-			* [Specifying `user.fields`](#specifying-userfields)
-		* [Pull account information with usernames - `user_lookup_usernames()`](#pull-account-information-with-usernames---user_lookup_usernames)
-	* [Utility Methods (`osometweet.utils`)](#utility-methods-osometweetutils)
-		* [`o_utils.pause_until`](#o_utilspause_until)
-		* [`o_utils.chunker`](#o_utilschunker)
-		* [`o_utils.ObjectFields`](#o_utilsobjectfields)
-	* [Pulling Followers and Following](#pulling-followers-and-following)
-		* [Pull Who Follows a Specific `user_id` - `get_followers()`](#pull-who-follows-a-specific-user_id---get_followers)
-		* [Pull Who a `user_id` Follows - `get_following()`](/#pull-who-a-user_id-follows---get_following)
+* [Quick start](#quick-start)
 
-
-# Getting Started
+# Introduction
 ## Install the PyPi version
 > [Return to top of page](#contents)
 ```bash
