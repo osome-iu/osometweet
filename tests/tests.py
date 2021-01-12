@@ -26,6 +26,7 @@ class TestOauth(unittest.TestCase):
             {"ids": f"{test_tweet_id}"}
             ).json()
         self.assertEqual(resp['data'][0]['id'], test_tweet_id)
+        oauth1a._oauth_1a.close()
     
     def test_1a_exception(self):
         with self.assertRaises(ValueError):
