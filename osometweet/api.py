@@ -328,29 +328,26 @@ class OsomeTweet:
         else:
             raise ValueError("Invalid type for parameter base_url, must be a string")
             
-    # Tweets
     def tweet_lookup(
             self,
             tids: Union[str, list, tuple],
-            expansions: ObjectExpansions = None,
-            fields: ObjectFields = None
-        ) -> requests.models.Response:
+            fields: ObjectFields = None,
+            expansions: ObjectExpansions = None
+        ) -> dict:
         """
         Looks-up at least one tweet using its tweet id.
         Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/api-reference/get-tweets
  
         Parameters:
             - tids: (str, list, tuple) - Up to 100 unique tweet ids.
+            - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (ObjectExpansions) - Expansions enable requests to
-            expand an ID into a full object in the includes response
-            object. (default = None)
-            - fields: (ObjectFields) - additional fields to return (default = None)
+            expand an ID into a full object in the response. (default = None)
         Returns:
-            requests.models.Response
+            dict
         Raises:
             - Exception
             - ValueError
-
         """
         if isinstance(tids, (str)):
             payload = {"ids": tids}
@@ -379,7 +376,7 @@ class OsomeTweet:
             user_id: str,
             user_fields: Union[list, tuple] = ["id", "name", "username"],
             **kwargs
-        ) -> requests.models.Response:
+        ) -> dict
         """
         Return a list of users who are followers of the specified user ID.
             - Max: 1000 user objects per query
@@ -391,10 +388,8 @@ class OsomeTweet:
             - user_fields (list, tuple) - The user fields included in returned data.
             (Default = "id", "name", "username")
             - kwargs - for optional arguments like "max_results" and "pagination_token"
-
         Returns:
-            requests.models.Response
-
+            dict
         Raises:
             - Exception
             - ValueError
@@ -406,7 +401,7 @@ class OsomeTweet:
             user_id: str,
             user_fields: Union[list, tuple] = ["id", "name", "username"],
             **kwargs
-        ) -> requests.models.Response:
+        ) -> dict:
         """
         Return a list of users the specified user ID is following.
             - Max: 1000 user objects per query
@@ -418,10 +413,8 @@ class OsomeTweet:
             - user_fields (list, tuple) - The user fields included in returned data.
             (Default = "id", "name", "username")
             - kwargs - for optional arguments like "max_results" and "pagination_token"
-
         Returns:
-            requests.models.Response
-
+            dict
         Raises:
             - Exception
             - ValueError
@@ -434,7 +427,7 @@ class OsomeTweet:
             endpoint: str,
             user_fields: Union[list, tuple] = ["id", "name", "username"],
             **kwargs
-        ) -> requests.models.Response:
+        ) -> dict:
         """
         Return a list of users who are followers of or followed by the specified user ID.
             - Max: 1000 user objects per query
@@ -447,10 +440,8 @@ class OsomeTweet:
             (Default = "id", "name", "username")
             - endpoint (str) - valid values are "followers" or "following"
             - kwargs - for optional arguments like "max_results" and "pagination_token"
-
         Returns:
-            requests.models.Response
-
+            dict
         Raises:
             - Exception
             - ValueError
@@ -492,7 +483,8 @@ class OsomeTweet:
     def user_lookup_ids(
             self,
             user_ids: Union[list, tuple],
-            user_fields: Union[list, tuple] = ["id", "name", "username"]
+            fields: ObjectFields = None,
+            expansions: ObjectExpansions = None
         ) -> dict:
         """
         Looks-up user account information using unique user account id numbers.
@@ -503,17 +495,21 @@ class OsomeTweet:
             - user_ids (list, tuple) - unique user ids to include in query (max 100)
             - user_fields (list, tuple) - the user fields included in returned data. 
             (Default = "id", "name", "username")
+            - fields: (ObjectFields) - additional fields to return. (default = None)
+            - expansions: (ObjectExpansions) - Expansions enable requests to
+            expand an ID into a full object in the response. (default = None)
         Returns:
-            - requests.models.Response
+            - dict
         Raises:
             - Exception, ValueError
         """
-        return self._user_lookup(user_ids, "id", user_fields=user_fields)
+        return self._user_lookup(user_ids, "id", fields=fields, expansions=expansions)
 
     def user_lookup_usernames(
             self,
             usernames: Union[list, tuple],
-            user_fields: Union[list, tuple] = ["id", "name", "username"]
+            fields: ObjectFields = None,
+            expansions: ObjectExpansions = None
         ) -> dict:
         """
         Looks-up user account information using account usernames.
@@ -524,8 +520,11 @@ class OsomeTweet:
             - usernames (list, tuple) - usernames to include in query (max 100)
             - user_fields (list, tuple) - the user fields included in returned data. 
             (Default = "id", "name", "username")
+            - fields: (ObjectFields) - additional fields to return. (default = None)
+            - expansions: (ObjectExpansions) - Expansions enable requests to
+            expand an ID into a full object in the response. (default = None)
         Returns:
-            - requests.models.Response
+            - dict
         Raises:
             - Exception, ValueError
         """
@@ -535,13 +534,14 @@ class OsomeTweet:
                 cleaned_usernames.append(username[1:])
             else:
                 cleaned_usernames.append(username)
-        return self._user_lookup(cleaned_usernames, "username", user_fields=user_fields)
+        return self._user_lookup(cleaned_usernames, "username", fields=fields, expansions=expansions)
 
     def _user_lookup(
             self, 
             query: Union[list, tuple], 
             query_type: str,
-            user_fields: Union[list, tuple] = ["id", "name", "username"]
+            fields: ObjectFields = None,
+            expansions: ObjectExpansions = None
         ) -> dict:
         """
         Looks-up user account information using unique user id numbers. 
@@ -552,8 +552,11 @@ class OsomeTweet:
         Parameters:
             - query (list, tuple) - unique user ids or usernames (max 100)
             - query_type (str) - type of the query, can be "id" or "username"
+            - fields: (ObjectFields) - additional fields to return. (default = None)
+            - expansions: (ObjectExpansions) - Expansions enable requests to
+            expand an ID into a full object in the response. (default = None)
         Returns:
-            - requests.models.Response
+            - dict
         Raises:
             - Exception, ValueError
         """
