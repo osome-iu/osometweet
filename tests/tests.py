@@ -188,6 +188,29 @@ class TestFields(unittest.TestCase):
     #     response = osometweet.utils.ObjectFields.return_place_fields()
     #     self.assertEqual(response, correct_fields)
 
+
+class TestExpansions(unittest.TestCase):
+    def setUp(self):
+        oauth2 = osometweet.OAuth2(bearer_token=bearer_token)
+        self.ot = osometweet.OsomeTweet(oauth2)
+    
+    def test_expansions(self):
+        expansions_to_request = [
+            "attachments.media_keys", "referenced_tweets.id", "author_id"
+        ]
+        expansions = osometweet.ObjectExpansions()
+        expansions.expansions = expansions_to_request
+        resp = self.ot.tweet_lookup(
+            ['1212092628029698048'],
+            expansions=expansions
+        )
+        self.assertIn("includes", resp)
+        self.assertIn("media", resp["includes"])
+        self.assertIn("media_key", resp["includes"]["media"][0])
+        self.assertIn("users", resp["includes"])
+        self.assertIn("tweets", resp["includes"])
+
+
 class TestUtils(unittest.TestCase):
     """
     Test all the utils endpoints
