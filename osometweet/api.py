@@ -341,25 +341,10 @@ class OsomeTweet:
  
         Parameters:
             - tids: (str, list, tuple) - Up to 100 unique tweet ids.
-            - expansions: (list, tuple) - Expansions enable requests to
+            - expansions: (ObjectExpansions) - Expansions enable requests to
             expand an ID into a full object in the includes response
             object. (default = None)
-            - media_fields: (list, tuple) - additional fields to return
-            in the media object. The response will contain the selected
-            fields only if a Tweet contains media attachments.(default = None)
-            - place_fields: (list, tuple) - additional fields to return
-            in the place object. The response will contain the selected
-            fields only if location data is present in any of the response
-            objects.(default = None)
-            - poll_fields: (list, tuple) - additional fields to return
-            in the poll object. The response will contain the selected
-            fields only if a Tweet contains a poll.(default = None)
-            - tweet_fields: (list, tuple) - additional fields to return
-            in the Tweet object. By default, `tweet_lookup` enters a
-            value of None which returns the `id` and `text` fields.
-            - user_fields: (list, tuple) - additional fields to return
-            in the user object. User field objects not returned unless
-            explicitly included. (default = None)
+            - fields: (ObjectFields) - additional fields to return (default = None)
         Returns:
             requests.models.Response
         Raises:
