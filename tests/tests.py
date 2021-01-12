@@ -106,23 +106,24 @@ class TestFields(unittest.TestCase):
         oauth2 = osometweet.OAuth2(bearer_token=bearer_token)
         self.ot = osometweet.OsomeTweet(oauth2)
 
-    # def test_user_fields(self):
-    #     """
-    #     Test user fields. Test case borrowed from
-    #     https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/user
-    #     """
-    #     fields_to_request = [
-    #         "created_at", "description", "entities", "id",
-    #         "location", "name", "pinned_tweet_id", "profile_image_url",
-    #         "protected", "public_metrics", "url", "username",
-    #         "verified", "withheld"
-    #     ]
-    #     user_fields = osometweet.UserFields()
-    #     user_fields.fields = fields_to_request
-    #     resp = self.ot.user_lookup_ids(
-    #         ['2244994945'],
-    #         )
-    #     self.assertEqual(fields, correct_fields)
+    def test_user_fields(self):
+        """
+        Test user fields. Test case borrowed from
+        https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/user
+        """
+        fields_to_request = [
+            "created_at", "description", "entities", "id",
+            "location", "name", "pinned_tweet_id", "profile_image_url",
+            "protected", "public_metrics", "url", "username", "verified"
+        ]
+        user_fields = osometweet.UserFields()
+        user_fields.fields = fields_to_request
+        resp = self.ot.user_lookup_ids(
+            ['2244994945'],
+            fields=user_fields
+            )
+        for field in fields_to_request:
+            self.assertIn(field, resp['data'][0])
 
     def test_tweet_fields(self):
         """
