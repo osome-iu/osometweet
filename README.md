@@ -13,8 +13,8 @@ The Wiki will work as an unofficial archive of knowledge people gather through t
 	* [How to seek helps and contribute](#how-to-seek-helps-and-contribute)
 * [Quick start](#quick-start)
 
-# Introduction
-## Install the PyPi version
+# Installation
+## Install the PyPI version
 > [Return to top of page](#contents)
 ```bash
 pip install osometweet
@@ -33,6 +33,14 @@ To do so, clone this project, go to the source directory, type the following com
 
 ```bash
 pip install -e .
+```
+
+## Requirements
+
+```bash
+python>=3.5
+requests>=2.24.0
+requests_oauthlib>=1.3.0
 ```
 
 ## Tests
