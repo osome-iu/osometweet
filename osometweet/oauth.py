@@ -73,14 +73,14 @@ class OAuth2(OAuthHandler):
     ) -> None:
         self._bearer_token = bearer_token
         self._set_bearer_token()
-    
+
     # Setters
     def _set_bearer_token(self) -> None:
         """
         Sets the bearer token, which authenticates the user using OAuth 2.0.
         Ref: https://developer.twitter.com/en/docs/authentication/oauth-2-0/bearer-tokens
-        
-        Raises: 
+
+        Raises:
             - Exception, ValueError
         """
         if isinstance(self._bearer_token, str):

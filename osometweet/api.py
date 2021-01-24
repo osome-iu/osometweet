@@ -30,7 +30,7 @@ class OsomeTweet:
     def set_base_url(self, base_url: str) -> None:
         """
         Sets the APIs base URL. The URL for API v2 is https://api.twitter.com/2/<endpoint>
-                
+
         Parameters:
             - base_url (str) - base url of the api
         Returns:
@@ -42,7 +42,7 @@ class OsomeTweet:
             self._base_url = base_url
         else:
             raise ValueError("Invalid type for parameter base_url, must be a string")
-            
+
     ########################################
     # Tweet endpoints
     def tweet_lookup(
@@ -54,7 +54,7 @@ class OsomeTweet:
         """
         Looks-up at least one tweet using its tweet id.
         Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/api-reference/get-tweets
- 
+
         Parameters:
             - tids: (str, list, tuple) - Up to 100 unique tweet ids.
             - fields: (ObjectFields) - additional fields to return. (default = None)
@@ -174,7 +174,7 @@ class OsomeTweet:
         # Check type of query and user_fields
         if not isinstance(user_id, str):
             raise ValueError("Invalid parameter type. `user_id` must be str")
-            
+
         # Construct URL
         url = f"{self._base_url}/users/{user_id}/{endpoint}"
         # Create payload.
@@ -203,7 +203,7 @@ class OsomeTweet:
 
         Parameters:
             - user_ids (list, tuple) - unique user ids to include in query (max 100)
-            - user_fields (list, tuple) - the user fields included in returned data. 
+            - user_fields (list, tuple) - the user fields included in returned data.
             (Default = "id", "name", "username")
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
@@ -228,7 +228,7 @@ class OsomeTweet:
 
         Parameters:
             - usernames (list, tuple) - usernames to include in query (max 100)
-            - user_fields (list, tuple) - the user fields included in returned data. 
+            - user_fields (list, tuple) - the user fields included in returned data.
             (Default = "id", "name", "username")
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
@@ -247,18 +247,18 @@ class OsomeTweet:
         return self._user_lookup(cleaned_usernames, "username", fields=fields, expansions=expansions)
 
     def _user_lookup(
-            self, 
-            query: Union[list, tuple], 
+            self,
+            query: Union[list, tuple],
             query_type: str,
             fields: ObjectFields = None,
             expansions: UserExpansions = None
         ) -> dict:
         """
-        Looks-up user account information using unique user id numbers. 
+        Looks-up user account information using unique user id numbers.
         User fields included by default match the default parameters from twitter.
         Ref: https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users
          and https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by
- 
+
         Parameters:
             - query (list, tuple) - unique user ids or usernames (max 100)
             - query_type (str) - type of the query, can be "id" or "username"
@@ -283,7 +283,7 @@ class OsomeTweet:
             }
         }.get(query_type)
 
-        # Check type of query and user_fields 
+        # Check type of query and user_fields
         if not isinstance(query, (list, tuple)):
             raise ValueError(
                 "Invalid parameter type: `query` must be" "either a list or tuple."
@@ -311,16 +311,16 @@ class OsomeTweet:
         while switch:
             # Get response
             response = self._oauth.make_request(url, payload)
-        
+
             # Get number of requests left with our tokens
             remaining_requests = int(response.headers["x-rate-limit-remaining"])
-            
-            # If that number is one, we get the reset-time 
+
+            # If that number is one, we get the reset-time
             #   and wait until then, plus 15 seconds (your welcome Twitter).
-            # The regular 429 exception is caught below as well, 
+            # The regular 429 exception is caught below as well,
             #   however, we want to program defensively, where possible.
             if remaining_requests == 1:
-                buffer_wait_time = 15 
+                buffer_wait_time = 15
                 resume_time = datetime.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
                 print(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
                 pause_until(resume_time)
@@ -332,7 +332,7 @@ class OsomeTweet:
 
                 # Too many requests error
                 if response.status_code == 429:
-                    buffer_wait_time = 15 
+                    buffer_wait_time = 15
                     resume_time = datetime.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
                     print(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
                     pause_until(resume_time)
@@ -357,7 +357,7 @@ class OsomeTweet:
                         response.status_code, response.text
                     )
                 )
-            
+
             # Each time we get a 200 response, lets exit the function and return the response.json
             if response.ok:
                 return response.json()

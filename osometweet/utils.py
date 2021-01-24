@@ -35,7 +35,7 @@ def pause_until(time):
 
     # Convert datetime to unix timestamp and adjust for locality
     if isinstance(time, datetime):
-        # If we're on Python 3 and the user specified a timezone, 
+        # If we're on Python 3 and the user specified a timezone,
         # convert to UTC and get tje timestamp.
         if sys.version_info[0] >= 3 and time.tzinfo:
             end = time.astimezone(timezone.utc).timestamp()

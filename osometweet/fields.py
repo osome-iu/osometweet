@@ -11,16 +11,16 @@ class ObjectFields:
     @property
     def fields_object(self):
         return self._fields_object
-    
+
     def __add__(self, value: "ObjectFields"):
         if isinstance(value, ObjectFields):
             return ObjectFields(fields_object={**self.fields_object, **value.fields_object})
         else:
             return self
-    
+
     def __radd__(self, value: "ObjectFields"):
         return self.__add__(value)
-    
+
     def __repr__(self):
         return str(self.fields_object)
 
@@ -35,11 +35,11 @@ class ObjectFieldsBase(ObjectFields):
             self._fields = self.default_fields + self.optional_fields
         else:
             self._fields = self.default_fields
-    
+
     @property
     def fields(self):
         return self._fields
-    
+
     @fields.setter
     def fields(self, value: Union[list, tuple]):
         if not isinstance(value, (list,tuple)):
@@ -58,7 +58,7 @@ class ObjectFieldsBase(ObjectFields):
     @property
     def fields_object(self):
         return {self.parameter_name: ",".join(self._fields)}
-    
+
     def __repr__(self):
         return ",".join(self.fields)
 

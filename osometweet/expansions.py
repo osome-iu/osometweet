@@ -12,7 +12,7 @@ class ObjectExpansions:
     @property
     def expansions(self):
         return self._expansions
-    
+
     @expansions.setter
     def expansions(self, value: Union[list, tuple]):
         if not isinstance(value, (list,tuple)):
