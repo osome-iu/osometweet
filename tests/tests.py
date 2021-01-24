@@ -26,6 +26,7 @@ class TestOauth(unittest.TestCase):
             {"ids": f"{test_tweet_id}"}
             ).json()
         self.assertEqual(resp['data'][0]['id'], test_tweet_id)
+        oauth1a._oauth_1a.close()
     
     def test_1a_exception(self):
         with self.assertRaises(ValueError):
@@ -106,23 +107,32 @@ class TestFields(unittest.TestCase):
         oauth2 = osometweet.OAuth2(bearer_token=bearer_token)
         self.ot = osometweet.OsomeTweet(oauth2)
 
-    # def test_user_fields(self):
-    #     """
-    #     Test user fields. Test case borrowed from
-    #     https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/user
-    #     """
-    #     fields_to_request = [
-    #         "created_at", "description", "entities", "id",
-    #         "location", "name", "pinned_tweet_id", "profile_image_url",
-    #         "protected", "public_metrics", "url", "username",
-    #         "verified", "withheld"
-    #     ]
-    #     user_fields = osometweet.UserFields()
-    #     user_fields.fields = fields_to_request
-    #     resp = self.ot.user_lookup_ids(
-    #         ['2244994945'],
-    #         )
-    #     self.assertEqual(fields, correct_fields)
+    def test_user_fields(self):
+        """
+        Test user fields. Test case borrowed from
+        https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/user
+        """
+        fields_to_request = [
+            "created_at", "description", "entities", "id",
+            "location", "name", "pinned_tweet_id", "profile_image_url",
+            "protected", "public_metrics", "url", "username", "verified"
+        ]
+        user_fields = osometweet.UserFields()
+        user_fields.fields = fields_to_request
+
+        resp = self.ot.user_lookup_ids(
+            ['2244994945'],
+            fields=user_fields
+            )
+        for field in fields_to_request:
+            self.assertIn(field, resp['data'][0])
+
+        resp_2 = self.ot.user_lookup_usernames(
+            ['TwitterDev'],
+            fields=user_fields
+            )
+        for field in fields_to_request:
+            self.assertIn(field, resp_2['data'][0])
 
     def test_tweet_fields(self):
         """
@@ -144,61 +154,17 @@ class TestFields(unittest.TestCase):
         for field in fields_to_request:
             self.assertIn(field, resp['data'][0])
 
-    # def test_rt_media_fields(self):
-    #     """Test return media fields method"""
-    #     correct_fields = [
-    #         "duration_ms",
-    #         "height",
-    #         "media_key",
-    #         "non_public_metrics",
-    #         "organic_metrics",
-    #         "preview_image_url",
-    #         "promoted_metrics",
-    #         "public_metrics",
-    #         "type",
-    #         "width"
-    #     ]
-    #     response = osometweet.utils.ObjectFields.return_media_fields()
-    #     self.assertEqual(response, correct_fields)
-
-    # def test_rt_poll_fields(self):
-    #     """Test return poll fields method"""
-    #     correct_fields = [
-    #         "duration_minutes",
-    #         "end_datetime",
-    #         "id",
-    #         "options",
-    #         "voting_status"
-    #     ]
-    #     response = osometweet.utils.ObjectFields.return_poll_fields()
-    #     self.assertEqual(response, correct_fields)
-
-    # def test_rt_place_fields(self):
-    #     """Test return place fields method"""
-    #     correct_fields = [
-    #         "contained_within",
-    #         "country",
-    #         "country_code",
-    #         "full_name",
-    #         "geo",
-    #         "id",
-    #         "name",
-    #         "place_type",
-    #     ]
-    #     response = osometweet.utils.ObjectFields.return_place_fields()
-    #     self.assertEqual(response, correct_fields)
-
 
 class TestExpansions(unittest.TestCase):
     def setUp(self):
         oauth2 = osometweet.OAuth2(bearer_token=bearer_token)
         self.ot = osometweet.OsomeTweet(oauth2)
     
-    def test_expansions(self):
+    def test_tweet_expansions(self):
         expansions_to_request = [
             "attachments.media_keys", "referenced_tweets.id", "author_id"
         ]
-        expansions = osometweet.ObjectExpansions()
+        expansions = osometweet.TweetExpansions()
         expansions.expansions = expansions_to_request
         resp = self.ot.tweet_lookup(
             ['1212092628029698048'],
@@ -209,6 +175,8 @@ class TestExpansions(unittest.TestCase):
         self.assertIn("media_key", resp["includes"]["media"][0])
         self.assertIn("users", resp["includes"])
         self.assertIn("tweets", resp["includes"])
+
+    # The user expansion can't be tested because the user might not have a pinned tweet
 
 
 class TestUtils(unittest.TestCase):
