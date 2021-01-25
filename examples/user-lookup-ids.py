@@ -4,20 +4,21 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 PURPOSE: 
-	-Script to scrape Twitter users account information 
-	with the Twitters V2 user_lookup endpoint. 
+    -Script to scrape Twitter users account information 
+    with the Twitters V2 user_lookup endpoint. 
 
 INPUT:
-	- A file of user IDs where each line contains one user_id
+    - A file of user IDs where each line contains one user_id
 
 OUTPUT:
-	- account_data--{todays-date}.json : a file where each line
-	represents one accounts information.
-    - account_data--{todays-date}.json : a file which records any
+    - account_data--{todays-date}.json : a file where each line
+    represents one accounts information.
+
+    - account_errors--{todays-date}.json : a file which records any
     errors received (one per line). You can then learn why certain ids
     were not returned (private, suspended, etc.).
 
-Author: Matthew DeVerna
+Author: Matthew R. DeVerna
 """
 
 
