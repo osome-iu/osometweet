@@ -13,7 +13,8 @@ INPUT:
 OUTPUT:
     - account_data--{todays-date}.json : a file where each line
     represents one accounts information.
-    - account_data--{todays-date}.json : a file which records any
+    
+    - account_errors--{todays-date}.json : a file which records any
     errors received (one per line). You can then learn why certain ids
     were not returned (private, suspended, etc.).
 
