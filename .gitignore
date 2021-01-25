@@ -139,3 +139,6 @@ cython_debug/
 
 # Matt's testing jupyter notebook
 testbook.ipynb
+
+# Folder for working files in the examples folder
+examples/wip/
