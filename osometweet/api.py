@@ -296,7 +296,7 @@ class OsomeTweet:
             - Exception
             - ValueError
         """
-        return self._follows_lookup(user_id, "mentions", fields=fields, expansions=expansions, **kwargs)
+        return self._timeline_lookup(user_id, "mentions", fields=fields, expansions=expansions, **kwargs)
 
     def _timeline_lookup(
             self,
