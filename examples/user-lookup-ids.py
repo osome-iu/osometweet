@@ -5,7 +5,7 @@
 """
 PURPOSE: 
     -Script to scrape Twitter users account information 
-    with the Twitters V2 user_lookup endpoint. 
+    with the Twitters V2 user_lookup_ids endpoint. 
 
 INPUT:
     - A file of user IDs where each line contains one user_id
@@ -29,7 +29,6 @@ import argparse
 import os
 import osometweet
 from osometweet.utils import chunker
-from osometweet.fields import get_all_avail_fields
 import json
 from tqdm import tqdm
 from datetime import datetime as dt
@@ -85,7 +84,7 @@ def load_bearer_token():
     # one that you see below.
 
     # Example:
-    # export 'TWITTER_API_KEY'='<your_twitter_api_key>'
+    # export 'TWITTER_BEARER_TOKEN'='<your_twitter_bearer_token>'
 
     # Do this for all of your tokens, and then load them with the commands below,
     # matching the string in the .get("string") to the name you chosen to the
