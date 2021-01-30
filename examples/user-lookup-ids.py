@@ -30,7 +30,6 @@ import os
 import osometweet
 from osometweet.utils import chunker
 import json
-from tqdm import tqdm
 from datetime import datetime as dt
 
 
@@ -115,8 +114,8 @@ def gather_data(
     # Open two files. One for good data, the other for account errors.
     with open(f"account_data--{today}.json", 'w') as data_file, open(f"account_errors--{today}.json", 'w') as error_file:
 
-        # Iterate through the list of lists, starting a tqdm timer
-        for one_hundred_users in tqdm(chunked_user_list):
+        # Iterate through the list of lists
+        for one_hundred_users in chunked_user_list:
             response = ot.user_lookup_ids(
                 user_ids=one_hundred_users,
                 fields=all_user_fields
