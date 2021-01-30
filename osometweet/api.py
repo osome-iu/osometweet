@@ -27,6 +27,9 @@ class OsomeTweet:
         self._base_url = base_url
         self._params = {}
 
+    ########################################
+    ########################################
+    # Helper functions
     def set_base_url(self, base_url: str) -> None:
         """
         Sets the APIs base URL. The URL for API v2 is https://api.twitter.com/2/<endpoint>
@@ -43,12 +46,51 @@ class OsomeTweet:
         else:
             raise ValueError("Invalid type for parameter base_url, must be a string")
 
+    def _decorate_payload(
+            self,
+            payload: dict = None,
+            endpoint_type: str = None,
+            everything: bool = False,
+            fields: ObjectFields = None,
+            expansions: TweetExpansions = None
+        ) -> dict:
+        if payload is None:
+            payload = dict()
+
+        if everything:
+            if endpoint_type == 'user':
+                fields = sum([
+                    TweetFields(everything=True),
+                    UserFields(everything=True)
+                ])
+                expansions = UserExpansions()
+            elif endpoint_type == 'tweet':
+                fields = sum([
+                    TweetFields(everything=True),
+                    UserFields(everything=True),
+                    MediaFields(everything=True),
+                    PollFields(everything=True),
+                    PlaceFields(everything=True)
+                ])
+                expansions = TweetExpansions()
+            else:
+                logger.error("Invalid endpoint type, must be 'user' or 'tweet'.")
+
+        # Include expansions if present
+        if expansions is not None:
+            payload.update(expansions.expansions_object)
+        # Include fields if present
+        if fields is not None:
+            payload.update(fields.fields_object)
+        return payload
+
     ########################################
     ########################################
     # Tweet endpoints
     def tweet_lookup(
             self,
             tids: Union[str, list, tuple],
+            everything: bool = False,
             fields: ObjectFields = None,
             expansions: TweetExpansions = None
         ) -> dict:
@@ -58,6 +100,7 @@ class OsomeTweet:
 
         Parameters:
             - tids: (str, list, tuple) - Up to 100 unique tweet ids.
+            - everything: (bool) - if return every fields and expansions
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (TweetExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -80,18 +123,20 @@ class OsomeTweet:
 
         # Set url and update payload with params
         url = f"{self._base_url}/tweets"
-        # Include expansions if present
-        if expansions is not None and isinstance(expansions, TweetExpansions):
-            payload.update(expansions.expansions_object)
-        # Include fields if present
-        if fields is not None:
-            payload.update(fields.fields_object)
+        payload = self._decorate_payload(
+            payload=payload,
+            endpoint_type='tweet',
+            everything=everything,
+            fields=fields,
+            expansions=expansions
+        )
         response = self._oauth.make_request(url, payload)
         return response.json()
 
     def get_tweet_timeline(
             self,
             user_id: str,
+            everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None,
             **kwargs
@@ -104,6 +149,7 @@ class OsomeTweet:
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
+            - everything: (bool) - if return all fields and expansions
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -141,11 +187,12 @@ class OsomeTweet:
             - Exception
             - ValueError
         """
-        return self._timeline_lookup(user_id, "tweets", fields=fields, expansions=expansions, **kwargs)
+        return self._timeline_lookup(user_id, "tweets", everything=everything, fields=fields, expansions=expansions, **kwargs)
 
     def get_mentions_timeline(
             self,
             user_id: str,
+            everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None,
             **kwargs
@@ -158,6 +205,7 @@ class OsomeTweet:
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
+            - everything: (bool) - if return all fields and expansions
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -195,12 +243,13 @@ class OsomeTweet:
             - Exception
             - ValueError
         """
-        return self._timeline_lookup(user_id, "mentions", fields=fields, expansions=expansions, **kwargs)
+        return self._timeline_lookup(user_id, "mentions", everything=everything, fields=fields, expansions=expansions, **kwargs)
 
     def _timeline_lookup(
             self,
             user_id: str,
             endpoint: str,
+            everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None,
             **kwargs
@@ -215,6 +264,7 @@ class OsomeTweet:
         Parameters:
             - user_id (str) - Unique user ID to include in the query
             - endpoint (str) - valid values are "followers" or "following"
+            - everything: (bool) - if return all fields and expansions
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -232,14 +282,13 @@ class OsomeTweet:
         # Construct URL
         url = f"{self._base_url}/users/{user_id}/{endpoint}"
         # Create payload.
-        payload = dict()
+        payload = self._decorate_payload(
+            endpoint_type='tweet',
+            everything=everything,
+            fields=fields,
+            expansions=expansions
+        )
         payload.update(kwargs)
-        # Include expansions if present
-        if expansions is not None and isinstance(expansions, TweetExpansions):
-            payload.update(expansions.expansions_object)
-        # Include fields if present
-        if fields is not None:
-            payload.update(fields.fields_object)
 
         response = self._oauth.make_request(url, payload)
         return response.json()
@@ -250,6 +299,7 @@ class OsomeTweet:
     def get_followers(
             self,
             user_id: str,
+            everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None,
             **kwargs
@@ -262,6 +312,7 @@ class OsomeTweet:
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
+            - everything: (bool) - if return all fields and expansions
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -272,11 +323,12 @@ class OsomeTweet:
             - Exception
             - ValueError
         """
-        return self._follows_lookup(user_id, "followers", fields=fields, expansions=expansions, **kwargs)
+        return self._follows_lookup(user_id, "followers", everything=everything, fields=fields, expansions=expansions, **kwargs)
 
     def get_following(
             self,
             user_id: str,
+            everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None,
             **kwargs
@@ -289,6 +341,7 @@ class OsomeTweet:
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
+            - everything: (bool) - if return all fields and expansions
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -299,12 +352,13 @@ class OsomeTweet:
             - Exception
             - ValueError
         """
-        return self._follows_lookup(user_id, "following", fields=fields, expansions=expansions, **kwargs)
+        return self._follows_lookup(user_id, "following", everything=everything, fields=fields, expansions=expansions, **kwargs)
 
     def _follows_lookup(
             self,
             user_id: str,
             endpoint: str,
+            everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None,
             **kwargs
@@ -318,6 +372,7 @@ class OsomeTweet:
         Parameters:
             - user_id (str) - Unique user ID to include in the query
             - endpoint (str) - valid values are "followers" or "following"
+            - everything: (bool) - if return all fields and expansions
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -335,14 +390,13 @@ class OsomeTweet:
         # Construct URL
         url = f"{self._base_url}/users/{user_id}/{endpoint}"
         # Create payload.
-        payload = dict()
+        payload = self._decorate_payload(
+            endpoint_type='user',
+            everything=everything,
+            fields=fields,
+            expansions=expansions
+        )
         payload.update(kwargs)
-        # Include expansions if present
-        if expansions is not None and isinstance(expansions, UserExpansions):
-            payload.update(expansions.expansions_object)
-        # Include fields if present
-        if fields is not None:
-            payload.update(fields.fields_object)
 
         response = self._oauth.make_request(url, payload)
         return response.json()
@@ -350,6 +404,7 @@ class OsomeTweet:
     def user_lookup_ids(
             self,
             user_ids: Union[list, tuple],
+            everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None
         ) -> dict:
@@ -360,6 +415,7 @@ class OsomeTweet:
 
         Parameters:
             - user_ids (list, tuple) - unique user ids to include in query (max 100)
+            - everything: (bool) - if return all fields and expansions
             - user_fields (list, tuple) - the user fields included in returned data.
             (Default = "id", "name", "username")
             - fields: (ObjectFields) - additional fields to return. (default = None)
@@ -370,11 +426,12 @@ class OsomeTweet:
         Raises:
             - Exception, ValueError
         """
-        return self._user_lookup(user_ids, "id", fields=fields, expansions=expansions)
+        return self._user_lookup(user_ids, "id", everything=everything, fields=fields, expansions=expansions)
 
     def user_lookup_usernames(
             self,
             usernames: Union[list, tuple],
+            everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None
         ) -> dict:
@@ -387,6 +444,7 @@ class OsomeTweet:
             - usernames (list, tuple) - usernames to include in query (max 100)
             - user_fields (list, tuple) - the user fields included in returned data.
             (Default = "id", "name", "username")
+            - everything: (bool) - if return all fields and expansions
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -401,12 +459,13 @@ class OsomeTweet:
                 cleaned_usernames.append(username[1:])
             else:
                 cleaned_usernames.append(username)
-        return self._user_lookup(cleaned_usernames, "username", fields=fields, expansions=expansions)
+        return self._user_lookup(cleaned_usernames, "username", everything=everything, fields=fields, expansions=expansions)
 
     def _user_lookup(
             self,
             query: Union[list, tuple],
             query_type: str,
+            everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None
         ) -> dict:
@@ -419,6 +478,7 @@ class OsomeTweet:
         Parameters:
             - query (list, tuple) - unique user ids or usernames (max 100)
             - query_type (str) - type of the query, can be "id" or "username"
+            - everything: (bool) - if return all fields and expansions
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -456,11 +516,13 @@ class OsomeTweet:
             raise Exception(f"You passed {len(query)} {query_specs['phrase']}. \
                 This exceeds the maximum for a single query, 100")
 
-        if expansions is not None and isinstance(expansions, UserExpansions):
-            payload.update(expansions.expansions_object)
-        # Include fields if present
-        if fields is not None:
-            payload.update(fields.fields_object)
+        payload = self._decorate_payload(
+            payload=payload,
+            endpoint_type='user',
+            everything=everything,
+            fields=fields,
+            expansions=expansions
+        )
 
         # Pull Data. Wait when necessary and catching time dependent errors.
         switch = True
