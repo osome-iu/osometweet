@@ -52,8 +52,20 @@ class OsomeTweet:
             endpoint_type: str = None,
             everything: bool = False,
             fields: ObjectFields = None,
-            expansions: TweetExpansions = None
+            expansions: ObjectExpansions = None
         ) -> dict:
+        """
+        Method to add fields and expansions to the payload.
+        If the `everything` is set to True, then all optional fields and expansions will be returned regardless of the values of `fields` and `expansions`.
+
+        Parameters:
+            - payload: (dict) - the payload
+            - everything: (bool) - if return all fields and expansions. (default = False)
+            - fields: (ObjectFields) - additional fields to return. (default = None)
+            - expansions: (TweetExpansions) - Expansions enable requests to expand an ID into a full object in the response. (default = None)
+        Returns:
+            - dict
+        """
         if payload is None:
             payload = dict()
 
@@ -100,7 +112,7 @@ class OsomeTweet:
 
         Parameters:
             - tids: (str, list, tuple) - Up to 100 unique tweet ids.
-            - everything: (bool) - if return every fields and expansions
+            - everything: (bool) - if return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (TweetExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -149,7 +161,7 @@ class OsomeTweet:
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
-            - everything: (bool) - if return all fields and expansions
+            - everything: (bool) - if return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -205,7 +217,7 @@ class OsomeTweet:
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
-            - everything: (bool) - if return all fields and expansions
+            - everything: (bool) - if return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -264,7 +276,7 @@ class OsomeTweet:
         Parameters:
             - user_id (str) - Unique user ID to include in the query
             - endpoint (str) - valid values are "followers" or "following"
-            - everything: (bool) - if return all fields and expansions
+            - everything: (bool) - if return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -312,7 +324,7 @@ class OsomeTweet:
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
-            - everything: (bool) - if return all fields and expansions
+            - everything: (bool) - if return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -341,7 +353,7 @@ class OsomeTweet:
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
-            - everything: (bool) - if return all fields and expansions
+            - everything: (bool) - if return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -372,7 +384,7 @@ class OsomeTweet:
         Parameters:
             - user_id (str) - Unique user ID to include in the query
             - endpoint (str) - valid values are "followers" or "following"
-            - everything: (bool) - if return all fields and expansions
+            - everything: (bool) - if return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -415,7 +427,7 @@ class OsomeTweet:
 
         Parameters:
             - user_ids (list, tuple) - unique user ids to include in query (max 100)
-            - everything: (bool) - if return all fields and expansions
+            - everything: (bool) - if return all fields and expansions. (default = False)
             - user_fields (list, tuple) - the user fields included in returned data.
             (Default = "id", "name", "username")
             - fields: (ObjectFields) - additional fields to return. (default = None)
@@ -444,7 +456,7 @@ class OsomeTweet:
             - usernames (list, tuple) - usernames to include in query (max 100)
             - user_fields (list, tuple) - the user fields included in returned data.
             (Default = "id", "name", "username")
-            - everything: (bool) - if return all fields and expansions
+            - everything: (bool) - if return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -478,7 +490,7 @@ class OsomeTweet:
         Parameters:
             - query (list, tuple) - unique user ids or usernames (max 100)
             - query_type (str) - type of the query, can be "id" or "username"
-            - everything: (bool) - if return all fields and expansions
+            - everything: (bool) - if return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
