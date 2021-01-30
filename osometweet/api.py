@@ -235,7 +235,7 @@ class OsomeTweet:
         payload = dict()
         payload.update(kwargs)
         # Include expansions if present
-        if expansions is not None and isinstance(expansions, UserExpansions):
+        if expansions is not None and isinstance(expansions, TweetExpansions):
             payload.update(expansions.expansions_object)
         # Include fields if present
         if fields is not None:
