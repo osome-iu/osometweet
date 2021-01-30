@@ -3,11 +3,11 @@ import os
 import unittest
 import osometweet
 
-api_key = os.environ.get('API_KEY', '')
-api_key_secret = os.environ.get('API_KEY_SECRET', '')
-access_token = os.environ.get('ACCESS_TOKEN', '')
-access_token_secret = os.environ.get('ACCESS_TOKEN_SECRET', '')
-bearer_token = os.environ.get("BEARER_TOKEN")
+api_key = os.environ.get('TWITTER_API_KEY', '')
+api_key_secret = os.environ.get('TWITTER_API_KEY_SECRET', '')
+access_token = os.environ.get('TWITTER_ACCESS_TOKEN', '')
+access_token_secret = os.environ.get('TWITTER_ACCESS_TOKEN_SECRET', '')
+bearer_token = os.environ.get("TWITTER_BEARER_TOKEN")
 
 class TestOauth(unittest.TestCase):
     """
@@ -89,12 +89,33 @@ class TestAPI(unittest.TestCase):
         )
         self.assertEqual(10, len(resp_2['data']))
 
-
     def test_get_following(self):
         resp = self.ot.get_following('12')
         self.assertEqual(resp['meta']['result_count'], len(resp['data']))
 
         resp_2 = self.ot.get_followers(
+            '12',
+            pagination_token=resp['meta']['next_token'],
+            max_results=10
+        )
+        self.assertEqual(10, len(resp_2['data']))
+
+    def test_get_tweet_timeline(self):
+        resp = self.ot.get_tweet_timeline('12')
+        self.assertEqual(resp['meta']['result_count'], len(resp['data']))
+
+        resp_2 = self.ot.get_tweet_timeline(
+            '12',
+            pagination_token=resp['meta']['next_token'],
+            max_results=10
+        )
+        self.assertEqual(10, len(resp_2['data']))
+
+    def test_get_mentions_timeline(self):
+        resp = self.ot.get_mentions_timeline('12')
+        self.assertEqual(resp['meta']['result_count'], len(resp['data']))
+
+        resp_2 = self.ot.get_mentions_timeline(
             '12',
             pagination_token=resp['meta']['next_token'],
             max_results=10
