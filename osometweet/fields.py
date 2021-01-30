@@ -125,13 +125,3 @@ class PlaceFields(ObjectFieldsBase):
     parameter_name = "place.fields"
     def __init__(self, everything: bool = False):
         super(PlaceFields, self).__init__(everything=everything)
-
-
-def get_all_avail_fields() -> "ObjectFields":
-    return sum([
-        TweetFields(everything=True),
-        UserFields(everything=True),
-        MediaFields(everything=True),
-        PollFields(everything=True),
-        PlaceFields(everything=True)
-    ])
