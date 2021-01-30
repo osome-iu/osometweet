@@ -44,6 +44,7 @@ class OsomeTweet:
             raise ValueError("Invalid type for parameter base_url, must be a string")
 
     ########################################
+    ########################################
     # Tweet endpoints
     def tweet_lookup(
             self,
@@ -88,108 +89,6 @@ class OsomeTweet:
         response = self._oauth.make_request(url, payload)
         return response.json()
 
-    ########################################
-    # User endpoints
-    def get_followers(
-            self,
-            user_id: str,
-            fields: ObjectFields = None,
-            expansions: UserExpansions = None,
-            **kwargs
-        ) -> dict:
-        """
-        Return a list of users who are followers of the specified user ID.
-            - Max: 1000 user objects per query
-            - Default: 100 user objects per query
-        https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-followers
-
-        Parameters:
-            - user_id (str) - Unique user ID to include in the query
-            - fields: (ObjectFields) - additional fields to return. (default = None)
-            - expansions: (UserExpansions) - Expansions enable requests to
-            expand an ID into a full object in the response. (default = None)
-            - kwargs - for optional arguments like "max_results" and "pagination_token"
-        Returns:
-            dict
-        Raises:
-            - Exception
-            - ValueError
-        """
-        return self._follows_lookup(user_id, "followers", fields=fields, expansions=expansions, **kwargs)
-
-    def get_following(
-            self,
-            user_id: str,
-            fields: ObjectFields = None,
-            expansions: UserExpansions = None,
-            **kwargs
-        ) -> dict:
-        """
-        Return a list of users the specified user ID is following.
-            - Max: 1000 user objects per query
-            - Default: 100 user objects per query
-        https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-following
-
-        Parameters:
-            - user_id (str) - Unique user ID to include in the query
-            - fields: (ObjectFields) - additional fields to return. (default = None)
-            - expansions: (UserExpansions) - Expansions enable requests to
-            expand an ID into a full object in the response. (default = None)
-            - kwargs - for optional arguments like "max_results" and "pagination_token"
-        Returns:
-            dict
-        Raises:
-            - Exception
-            - ValueError
-        """
-        return self._follows_lookup(user_id, "following", fields=fields, expansions=expansions, **kwargs)
-
-    def _follows_lookup(
-            self,
-            user_id: str,
-            endpoint: str,
-            fields: ObjectFields = None,
-            expansions: UserExpansions = None,
-            **kwargs
-        ) -> dict:
-        """
-        Return a list of users who are followers of or followed by the specified user ID.
-            - Max: 1000 user objects per query
-            - Default: 100 user objects per query
-        https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-followers
-
-        Parameters:
-            - user_id (str) - Unique user ID to include in the query
-            - endpoint (str) - valid values are "followers" or "following"
-            - fields: (ObjectFields) - additional fields to return. (default = None)
-            - expansions: (UserExpansions) - Expansions enable requests to
-            expand an ID into a full object in the response. (default = None)
-            - kwargs - for optional arguments like "max_results" and "pagination_token"
-        Returns:
-            dict
-        Raises:
-            - Exception
-            - ValueError
-        """
-        # Check type of query and user_fields
-        if not isinstance(user_id, str):
-            raise ValueError("Invalid parameter type. `user_id` must be str")
-
-        # Construct URL
-        url = f"{self._base_url}/users/{user_id}/{endpoint}"
-        # Create payload.
-        payload = dict()
-        payload.update(kwargs)
-        # Include expansions if present
-        if expansions is not None and isinstance(expansions, UserExpansions):
-            payload.update(expansions.expansions_object)
-        # Include fields if present
-        if fields is not None:
-            payload.update(fields.fields_object)
-
-        response = self._oauth.make_request(url, payload)
-        return response.json()
-
     def get_tweet_timeline(
             self,
             user_id: str,
@@ -209,7 +108,7 @@ class OsomeTweet:
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
             - kwargs - for optional arguments like "end_time", "until_it" and "pagination_token"
-        
+
         Available kwargs:
             - end_time (date (ISO 8601)): The newest or most recent UTC timestamp from
                 which the Tweets will be provided. Does not override 3200 limit. Has
@@ -312,6 +211,109 @@ class OsomeTweet:
             - Max (Mentions): 800 most recent tweets (using pagination_token)
             - Default (Both): 10 most recent tweets (tweet_id and text data fields only)
         https://developer.twitter.com/en/docs/twitter-api/tweets/timelines/api-reference
+
+        Parameters:
+            - user_id (str) - Unique user ID to include in the query
+            - endpoint (str) - valid values are "followers" or "following"
+            - fields: (ObjectFields) - additional fields to return. (default = None)
+            - expansions: (UserExpansions) - Expansions enable requests to
+            expand an ID into a full object in the response. (default = None)
+            - kwargs - for optional arguments like "max_results" and "pagination_token"
+        Returns:
+            dict
+        Raises:
+            - Exception
+            - ValueError
+        """
+        # Check type of query and user_fields
+        if not isinstance(user_id, str):
+            raise ValueError("Invalid parameter type. `user_id` must be str")
+
+        # Construct URL
+        url = f"{self._base_url}/users/{user_id}/{endpoint}"
+        # Create payload.
+        payload = dict()
+        payload.update(kwargs)
+        # Include expansions if present
+        if expansions is not None and isinstance(expansions, UserExpansions):
+            payload.update(expansions.expansions_object)
+        # Include fields if present
+        if fields is not None:
+            payload.update(fields.fields_object)
+
+        response = self._oauth.make_request(url, payload)
+        return response.json()
+
+    ########################################
+    ########################################
+    # User endpoints
+    def get_followers(
+            self,
+            user_id: str,
+            fields: ObjectFields = None,
+            expansions: UserExpansions = None,
+            **kwargs
+        ) -> dict:
+        """
+        Return a list of users who are followers of the specified user ID.
+            - Max: 1000 user objects per query
+            - Default: 100 user objects per query
+        https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-followers
+
+        Parameters:
+            - user_id (str) - Unique user ID to include in the query
+            - fields: (ObjectFields) - additional fields to return. (default = None)
+            - expansions: (UserExpansions) - Expansions enable requests to
+            expand an ID into a full object in the response. (default = None)
+            - kwargs - for optional arguments like "max_results" and "pagination_token"
+        Returns:
+            dict
+        Raises:
+            - Exception
+            - ValueError
+        """
+        return self._follows_lookup(user_id, "followers", fields=fields, expansions=expansions, **kwargs)
+
+    def get_following(
+            self,
+            user_id: str,
+            fields: ObjectFields = None,
+            expansions: UserExpansions = None,
+            **kwargs
+        ) -> dict:
+        """
+        Return a list of users the specified user ID is following.
+            - Max: 1000 user objects per query
+            - Default: 100 user objects per query
+        https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-following
+
+        Parameters:
+            - user_id (str) - Unique user ID to include in the query
+            - fields: (ObjectFields) - additional fields to return. (default = None)
+            - expansions: (UserExpansions) - Expansions enable requests to
+            expand an ID into a full object in the response. (default = None)
+            - kwargs - for optional arguments like "max_results" and "pagination_token"
+        Returns:
+            dict
+        Raises:
+            - Exception
+            - ValueError
+        """
+        return self._follows_lookup(user_id, "following", fields=fields, expansions=expansions, **kwargs)
+
+    def _follows_lookup(
+            self,
+            user_id: str,
+            endpoint: str,
+            fields: ObjectFields = None,
+            expansions: UserExpansions = None,
+            **kwargs
+        ) -> dict:
+        """
+        Return a list of users who are followers of or followed by the specified user ID.
+            - Max: 1000 user objects per query
+            - Default: 100 user objects per query
+        https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-followers
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
