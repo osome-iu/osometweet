@@ -74,4 +74,6 @@ which returns a list of dictionaries, where each dictionary contains the request
 ]
 ```
 
+For more examples, check out our [examples folder](examples).
+
 For detailed instructions, check out our [wiki](https://github.com/osome-iu/osometweet/wiki).
