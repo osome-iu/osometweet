@@ -60,9 +60,10 @@ class OsomeTweet:
 
         Parameters:
             - payload: (dict) - the payload
-            - everything: (bool) - if return all fields and expansions. (default = False)
+            - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (TweetExpansions) - Expansions enable requests to expand an ID into a full object in the response. (default = None)
+
         Returns:
             - dict
         """
@@ -112,12 +113,14 @@ class OsomeTweet:
 
         Parameters:
             - tids: (str, list, tuple) - Up to 100 unique tweet ids.
-            - everything: (bool) - if return all fields and expansions. (default = False)
+            - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (TweetExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
+        
         Returns:
-            dict
+            - dict
+
         Raises:
             - Exception
             - ValueError
@@ -157,11 +160,11 @@ class OsomeTweet:
         Returns Tweets composed by a single user, specified by the requested user ID.
             - Max: 3200 most recent tweets (using pagination_token)
             - Default: 10 most recent tweets (tweet_id and text data fields only)
-        https://developer.twitter.com/en/docs/twitter-api/tweets/timelines/api-reference/get-users-id-tweets
+        Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/timelines/api-reference/get-users-id-tweets
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
-            - everything: (bool) - if return all fields and expansions. (default = False)
+            - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -193,7 +196,7 @@ class OsomeTweet:
                 tweet ID provided. Does not override 3200 limit.
 
         Returns:
-            dict
+            - dict
 
         Raises:
             - Exception
@@ -213,11 +216,11 @@ class OsomeTweet:
         Returns Tweets mentioning a single user specified by the requested user ID.
             - Max: 800 most recent tweets (using pagination_token)
             - Default: 10 most recent tweets (tweet_id and text data fields only)
-        https://developer.twitter.com/en/docs/twitter-api/tweets/timelines/api-reference/get-users-id-mentions
+        Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/timelines/api-reference/get-users-id-mentions
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
-            - everything: (bool) - if return all fields and expansions. (default = False)
+            - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
@@ -249,7 +252,7 @@ class OsomeTweet:
                 tweet ID provided. Does not override 3200 limit.
 
         Returns:
-            dict
+            - dict
 
         Raises:
             - Exception
@@ -271,18 +274,23 @@ class OsomeTweet:
             - Max (Timeline): 3200 most recent tweets (using pagination_token)
             - Max (Mentions): 800 most recent tweets (using pagination_token)
             - Default (Both): 10 most recent tweets (tweet_id and text data fields only)
-        https://developer.twitter.com/en/docs/twitter-api/tweets/timelines/api-reference
+        Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/timelines/api-reference
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
             - endpoint (str) - valid values are "followers" or "following"
-            - everything: (bool) - if return all fields and expansions. (default = False)
+            - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
             - kwargs - for optional arguments like "max_results" and "pagination_token"
+        
+        Available kwargs:
+            - See user-facing method doc-strings for available kwargs
+
         Returns:
-            dict
+            - dict
+
         Raises:
             - Exception
             - ValueError
@@ -320,17 +328,29 @@ class OsomeTweet:
         Return a list of users who are followers of the specified user ID.
             - Max: 1000 user objects per query
             - Default: 100 user objects per query
-        https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-followers
+        Ref: https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-followers
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
-            - everything: (bool) - if return all fields and expansions. (default = False)
+            - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
             - kwargs - for optional arguments like "max_results" and "pagination_token"
+
+        Available kwargs:
+            - max_results (int) : The maximum number of results to be returned per page.
+                This can be a number between 1 and the 1000. By default, each page will
+                return 100 results.
+            - pagination_token (str) : This parameter is used to move forwards or
+                backwards through 'pages' of results, based on the value of the
+                next_token or previous_token in the response. (E.g., after executing
+                `response = get_tweet_timeline()`, `next_token` can be found with
+                `response["meta"]["next_token"]`)
+
         Returns:
-            dict
+            - dict
+
         Raises:
             - Exception
             - ValueError
@@ -349,17 +369,29 @@ class OsomeTweet:
         Return a list of users the specified user ID is following.
             - Max: 1000 user objects per query
             - Default: 100 user objects per query
-        https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-following
+        Ref: https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-following
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
-            - everything: (bool) - if return all fields and expansions. (default = False)
+            - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
             - kwargs - for optional arguments like "max_results" and "pagination_token"
+
+        Available kwargs:
+            - max_results (int) : The maximum number of results to be returned per page.
+                This can be a number between 1 and the 1000. By default, each page will
+                return 100 results.
+            - pagination_token (str) : This parameter is used to move forwards or
+                backwards through 'pages' of results, based on the value of the
+                next_token or previous_token in the response. (E.g., after executing
+                `response = get_tweet_timeline()`, `next_token` can be found with
+                `response["meta"]["next_token"]`)
+
         Returns:
-            dict
+            - dict
+
         Raises:
             - Exception
             - ValueError
@@ -379,18 +411,20 @@ class OsomeTweet:
         Return a list of users who are followers of or followed by the specified user ID.
             - Max: 1000 user objects per query
             - Default: 100 user objects per query
-        https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-followers
+        Ref: https://developer.twitter.com/en/docs/twitter-api/users/follows/api-reference/get-users-id-followers
 
         Parameters:
             - user_id (str) - Unique user ID to include in the query
             - endpoint (str) - valid values are "followers" or "following"
-            - everything: (bool) - if return all fields and expansions. (default = False)
+            - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
             - kwargs - for optional arguments like "max_results" and "pagination_token"
+        
         Returns:
-            dict
+            - dict
+
         Raises:
             - Exception
             - ValueError
@@ -427,16 +461,19 @@ class OsomeTweet:
 
         Parameters:
             - user_ids (list, tuple) - unique user ids to include in query (max 100)
-            - everything: (bool) - if return all fields and expansions. (default = False)
+            - everything: (bool) - if True, return all fields and expansions. (default = False)
             - user_fields (list, tuple) - the user fields included in returned data.
             (Default = "id", "name", "username")
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
+
         Returns:
             - dict
+
         Raises:
-            - Exception, ValueError
+            - Exception
+            - ValueError
         """
         return self._user_lookup(user_ids, "id", everything=everything, fields=fields, expansions=expansions)
 
@@ -456,14 +493,17 @@ class OsomeTweet:
             - usernames (list, tuple) - usernames to include in query (max 100)
             - user_fields (list, tuple) - the user fields included in returned data.
             (Default = "id", "name", "username")
-            - everything: (bool) - if return all fields and expansions. (default = False)
+            - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
+
         Returns:
             - dict
+
         Raises:
-            - Exception, ValueError
+            - Exception
+            - ValueError
         """
         cleaned_usernames = []
         for username in usernames:
@@ -490,14 +530,17 @@ class OsomeTweet:
         Parameters:
             - query (list, tuple) - unique user ids or usernames (max 100)
             - query_type (str) - type of the query, can be "id" or "username"
-            - everything: (bool) - if return all fields and expansions. (default = False)
+            - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
             expand an ID into a full object in the response. (default = None)
+        
         Returns:
             - dict
+
         Raises:
-            - Exception, ValueError
+            - Exception
+            - ValueError
         """
         query_specs = {
             "id": {
