@@ -75,14 +75,14 @@ def load_users(usernames_file):
         )
     return chunked_user_list
 
-def load_bearer_token():
+def load_keys():
     """Load Twitter Keys from Local Environment."""
 
     # To set your enviornment variables in your terminal execute a command like the 
     # one that you see below.
 
     # Example:
-    # export 'TWITTER_BEARER_TOKEN'='<your_twitter_bearer_token>'
+    # export 'TWITTER_API_KEY'='<your_twitter_api_key>'
 
     # Do this for all of your tokens, and then load them with the commands below,
     # matching the string in the .get("string") to the name you chosen to the
@@ -90,19 +90,30 @@ def load_bearer_token():
 
     # Set Twitter tokens/keys.
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    bearer_token = os.environ.get("TWITTER_BEARER_TOKEN")
+    access_token = os.environ.get("TWITTER_ACCESS_TOKEN")
+    access_token_secret = os.environ.get("TWITTER_ACCESS_TOKEN_SECRET")
+    api_key = os.environ.get("TWITTER_API_KEY")
+    api_key_secret = os.environ.get("TWITTER_API_KEY_SECRET")
 
-    return bearer_token
+    return access_token, access_token_secret, api_key, api_key_secret
 
 def gather_data(
-    bearer_token,
+    access_token,
+    access_token_secret,
+    api_key,
+    api_key_secret,
     chunked_user_list,
     usernames_file
     ):
     print("Gathering Data...")
 
-    oauth2 = osometweet.OAuth2(bearer_token=bearer_token)
-    ot = osometweet.OsomeTweet(oauth2)
+    oauth1a = osometweet.OAuth1a(
+        api_key = api_key,
+        api_key_secret = api_key_secret,
+        access_token = access_token,
+        access_token_secret = access_token_secret
+        )
+    ot = osometweet.OsomeTweet(oauth1a)
 
     # Add all user_fields
     all_user_fields = osometweet.UserFields(everything = True)
@@ -153,10 +164,13 @@ def gather_data(
 if __name__ == "__main__":
     usernames_file = parse_cl_args()
     chunked_user_list = load_users(usernames_file)
-    bearer_token = load_bearer_token()
+    access_token, access_token_secret, api_key, api_key_secret = load_keys()
     
     gather_data(
-        bearer_token = bearer_token,
+        access_token = access_token,
+        access_token_secret = access_token_secret,
+        api_key = api_key,
+        api_key_secret = api_key_secret,
         chunked_user_list = chunked_user_list,
         usernames_file = usernames_file,
     )
