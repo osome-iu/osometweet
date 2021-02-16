@@ -122,6 +122,14 @@ class TestAPI(unittest.TestCase):
         )
         self.assertEqual(10, len(resp_2['data']))
 
+    def test_search(self):
+        resp = self.ot.search(
+            query = "from:jack",
+            since_id = "1360109997242216450",
+            until_id = "1360720695337000962",
+            full_archive_search=True
+            )
+
 
 class TestFields(unittest.TestCase):
     def setUp(self):
