@@ -99,6 +99,158 @@ class OsomeTweet:
 
     ########################################
     ########################################
+    # Search endpoints
+    def search(
+            self,
+            query: str = None,
+            everything: bool = False,
+            fields: ObjectFields = None,
+            expansions: TweetExpansions = None,
+            full_archive_search: bool = False,
+            **kwargs
+        ) -> dict:
+        """
+        Return tweets matching a search query. Use either the Recent Search or
+            Full Archive Search endpoints via full_archive_search parameter.
+
+        Recent Search: search tweets from the past 7 days
+            - Reference: https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent
+        Full Archive Search (Academic product track only!): search the complete
+            history of public Tweets.
+            - Reference: https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-all
+
+        How to Build a Query:
+            - Reference: https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query
+
+        Parameters:
+            - query: (str) - One query for matching Tweets.
+                Recent Search query limit = 512
+                Full Archive query limit = 1024
+            - everything: (bool) - if True, return all fields and expansions. (default = False)
+            - fields: (ObjectFields) - additional fields to return. (default = None)
+            - expansions: (ExpansionsObject) - Expansions enable requests to
+                expand an ID into a full object in the response. (default = None)
+            - full_archive_search (bool): True = use Full Archive Search endpoint (Academic
+                Track only). False = use Recent Search endpoint.
+            - kwargs - for optional arguments like "start_time", "end_time" and "next_token"
+
+        Available kwargs:
+            - end_time (date (ISO 8601)): Used with `start_time`. The newest,
+                most recent UTC timestamp to which the Tweets will be provided.
+                Timestamp is in second granularity and is exclusive (for example,
+                12:00:01 excludes the first second of the minute). If used without
+                `start_time`, Tweets from 30 days before `end_time` will be returned by
+                default. If not specified, `end_time` will default to [now - 30 seconds].
+            - max_results (int) : The maximum number of search results to be returned
+                by a request. A number between 10 and the system limit (currently 500).
+                By default, a request response will return 10 results.
+            - next_token (str) :  This parameter is used to move to the next 'page' of
+                results, based on the value of the `next_token` in the response. (E.g.,
+                after executing `response = search()`, `next_token` can be found with
+                `response["meta"]["next_token"]` - which should then be passed to the
+                search method)
+            - since_id (str) : Returns results with a Tweet ID greater than (for
+                example, more recent than) the specified ID. The ID specified is
+                exclusive and responses will not include it. If included with the
+                same request as a start_time parameter, only since_id will be used.
+            - start_time (date ISO 8601) : The oldest UTC timestamp from which the Tweets
+                will be provided. Timestamp is in second granularity and is inclusive
+                (for example, 12:00:01 includes the first second of the minute). By default,
+                a request will return Tweets from up to 30 days ago if you do not
+                include this parameter.
+            - until_id (str) : Returns results with a Tweet ID less than (that is,
+                older than) the specified ID. Used with since_id. The ID specified
+                is exclusive and responses will not include it.
+
+        OPERATORS:
+            - REF: https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query
+
+        Standalone (can be used on their own):
+            - keyword
+            - emoji
+            - #
+            - @
+            - $ (Academic research only)
+            - from:
+            - to:
+            - url:
+            - retweets_of:
+            - context:
+            - entitiy:
+            - conversation_id:
+            - place: (Academic research only)
+            - place_country: (Academic research only)
+            - point_radius: (Academic research only)
+            - bounding_box: (Academic research only)
+
+        Conjuction (must be used with standalone operators):
+            - is:retweet
+            - is:quote
+            - is:verified
+            - -is:nullcast (Academic research only)
+            - has:hashtags
+            - has:cashtags (Academic research only)
+            - has:links
+            - has:mentions
+            - has:media
+            - has:images
+            - has:videos
+            - has:geo (Academic research only)
+            - lang:
+
+        Returns:
+            - dict
+
+        Raises:
+            - Exception
+            - ValueError
+        """
+        # Set url and initialize payload with query
+        if not isinstance(full_archive_search, bool):
+            raise ValueError("Invalid type for paratmer `full_archive_search`, must be a"\
+                "boolean object (i.e.,True or False)."
+                )
+        if full_archive_search:
+            url = f"{self._base_url}/tweets/search/all"
+
+            # Check query is not too long, create payload
+            if isinstance(query, str):
+                if len(query) <= 1024:
+                    payload = {"query": query}
+                else:
+                    raise Exception(f"Query length too long for academic search endpoint. "\
+                        f"Current query = {len(query)}. Must be <= 1024.")
+            else:
+                raise ValueError("Query must be passed as a single string.")
+        else:
+            url = f"{self._base_url}/tweets/search/recent"
+
+            # Check query is not too long, create payload
+            if isinstance(query, str):
+                if len(query) <= 512:
+                    payload = {"query": query}
+                else:
+                    raise Exception(f"Query length too long for standard search endpoint. "\
+                        f"Current query = {len(query)}. Must be <= 512.")
+            else:
+                raise ValueError("Query must be passed as a single string.")
+
+        # Populate payload object w/ fields and expansions
+        payload = self._decorate_payload(
+            payload=payload,
+            endpoint_type='tweet',
+            everything=everything,
+            fields=fields,
+            expansions=expansions
+        )
+        # Add kwargs
+        payload.update(kwargs)
+
+        response = self._oauth.make_request(url, payload)
+        return response.json()
+
+    ########################################
+    ########################################
     # Tweet endpoints
     def tweet_lookup(
             self,
@@ -116,7 +268,7 @@ class OsomeTweet:
             - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (TweetExpansions) - Expansions enable requests to
-            expand an ID into a full object in the response. (default = None)
+                expand an ID into a full object in the response. (default = None)
         
         Returns:
             - dict
@@ -167,8 +319,8 @@ class OsomeTweet:
             - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
-            expand an ID into a full object in the response. (default = None)
-            - kwargs - for optional arguments like "end_time", "until_it" and "pagination_token"
+                expand an ID into a full object in the response. (default = None)
+            - kwargs - for optional arguments like "end_time", "until_id" and "pagination_token"
 
         Available kwargs:
             - end_time (date (ISO 8601)): The newest or most recent UTC timestamp from
@@ -223,7 +375,7 @@ class OsomeTweet:
             - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
-            expand an ID into a full object in the response. (default = None)
+                expand an ID into a full object in the response. (default = None)
             - kwargs - for optional arguments like "max_results" and "pagination_token"
 
         Available kwargs:
@@ -282,7 +434,7 @@ class OsomeTweet:
             - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
-            expand an ID into a full object in the response. (default = None)
+                expand an ID into a full object in the response. (default = None)
             - kwargs - for optional arguments like "max_results" and "pagination_token"
         
         Available kwargs:
@@ -335,7 +487,7 @@ class OsomeTweet:
             - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
-            expand an ID into a full object in the response. (default = None)
+                expand an ID into a full object in the response. (default = None)
             - kwargs - for optional arguments like "max_results" and "pagination_token"
 
         Available kwargs:
@@ -376,7 +528,7 @@ class OsomeTweet:
             - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
-            expand an ID into a full object in the response. (default = None)
+                expand an ID into a full object in the response. (default = None)
             - kwargs - for optional arguments like "max_results" and "pagination_token"
 
         Available kwargs:
@@ -419,7 +571,7 @@ class OsomeTweet:
             - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
-            expand an ID into a full object in the response. (default = None)
+                expand an ID into a full object in the response. (default = None)
             - kwargs - for optional arguments like "max_results" and "pagination_token"
         
         Returns:
@@ -463,10 +615,10 @@ class OsomeTweet:
             - user_ids (list, tuple) - unique user ids to include in query (max 100)
             - everything: (bool) - if True, return all fields and expansions. (default = False)
             - user_fields (list, tuple) - the user fields included in returned data.
-            (Default = "id", "name", "username")
+                (Default = "id", "name", "username")
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
-            expand an ID into a full object in the response. (default = None)
+                expand an ID into a full object in the response. (default = None)
 
         Returns:
             - dict
@@ -492,11 +644,11 @@ class OsomeTweet:
         Parameters:
             - usernames (list, tuple) - usernames to include in query (max 100)
             - user_fields (list, tuple) - the user fields included in returned data.
-            (Default = "id", "name", "username")
+                (Default = "id", "name", "username")
             - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
-            expand an ID into a full object in the response. (default = None)
+                expand an ID into a full object in the response. (default = None)
 
         Returns:
             - dict
@@ -533,7 +685,7 @@ class OsomeTweet:
             - everything: (bool) - if True, return all fields and expansions. (default = False)
             - fields: (ObjectFields) - additional fields to return. (default = None)
             - expansions: (UserExpansions) - Expansions enable requests to
-            expand an ID into a full object in the response. (default = None)
+                expand an ID into a full object in the response. (default = None)
         
         Returns:
             - dict
