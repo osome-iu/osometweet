@@ -1,6 +1,7 @@
 import requests
 from requests_oauthlib import OAuth1Session
 
+
 class OAuthHandler:
     def __init__(self):
         pass
@@ -15,8 +16,7 @@ class OAuth1a(OAuthHandler):
         api_key: str = "",
         api_key_secret: str = "",
         access_token: str = "",
-        access_token_secret = "",
-
+        access_token_secret="",
     ) -> None:
         self._api_key = api_key
         self._api_key_secret = api_key_secret
@@ -32,24 +32,25 @@ class OAuth1a(OAuthHandler):
         Raises:
             - Exception, ValueError
         """
-        for key_name in ['api_key', 'api_key_secret', 'access_token', 'access_token_secret']:
-            if not isinstance(getattr(self, '_' + key_name), str):
+        for key_name in [
+            "api_key",
+            "api_key_secret",
+            "access_token",
+            "access_token_secret",
+        ]:
+            if not isinstance(getattr(self, "_" + key_name), str):
                 raise ValueError(
                     f"Invalid type for parameter {key_name}, must be a string."
-                    )
+                )
         # Get oauth object
         self._oauth_1a = OAuth1Session(
             self._api_key,
-            client_secret = self._api_key_secret,
-            resource_owner_key = self._access_token,
-            resource_owner_secret = self._access_token_secret
-            )
+            client_secret=self._api_key_secret,
+            resource_owner_key=self._access_token,
+            resource_owner_secret=self._access_token_secret,
+        )
 
-    def make_request(
-        self,
-        url: str,
-        payload: dict
-       ) -> requests.models.Response:
+    def make_request(self, url: str, payload: dict) -> requests.models.Response:
         """
         Method to make the http request to Twitter API
 
@@ -67,10 +68,8 @@ class OAuth2(OAuthHandler):
     Class to handle authenticiation through OAuth 2.0 without user context
     Only bearer token is required for this class
     """
-    def __init__(
-        self,
-        bearer_token: str= "",
-    ) -> None:
+
+    def __init__(self, bearer_token: str = "",) -> None:
         self._bearer_token = bearer_token
         self._set_bearer_token()
 
@@ -91,9 +90,7 @@ class OAuth2(OAuthHandler):
             )
 
     def make_request(
-        self,
-        url: str,
-        payload: dict
+        self, url: str, payload: dict, stream: bool = None
     ) -> requests.models.Response:
         """
         Method to make the http request to Twitter API
@@ -104,8 +101,5 @@ class OAuth2(OAuthHandler):
         Returns:
             - requests.models.Response
         """
-        return requests.get(
-            url,
-            headers=self._header,
-            params=payload
-        )
+        return requests.get(url, headers=self._header, params=payload, stream=stream)
+
