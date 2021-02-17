@@ -90,7 +90,7 @@ class OAuth2(OAuthHandler):
             )
 
     def make_request(
-        self, url: str, payload: dict, stream: bool = None
+        self, url: str, payload: dict, stream: bool = False
     ) -> requests.models.Response:
         """
         Method to make the http request to Twitter API
