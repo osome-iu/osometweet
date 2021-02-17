@@ -1,7 +1,7 @@
 # How to contribute to the OsoMeTweet package
 
 ### Questions?
-1. Check [the Wiki](https://github.com/osome-iu/osometweet/wiki), we have A LOT of documentation.
+1. Check [the Wiki](https://github.com/osome-iu/osometweet/wiki), we have a lot of documentation.
 2. Problem not solved in the Wiki?
     1. Check if the question has been asked/answered already by searching the issues
     2. If it hasn't, open an issue
