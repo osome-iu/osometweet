@@ -1,6 +1,8 @@
 import requests
 from requests_oauthlib import OAuth1Session
 
+from osometweet.rate_limit_manager import manage_rate_limits
+
 class OAuthHandler:
     def __init__(self):
         pass
@@ -15,13 +17,15 @@ class OAuth1a(OAuthHandler):
         api_key: str = "",
         api_key_secret: str = "",
         access_token: str = "",
-        access_token_secret = "",
+        access_token_secret: str = "",
+        manage_rate_limits: bool = True
 
     ) -> None:
         self._api_key = api_key
         self._api_key_secret = api_key_secret
         self._access_token = access_token
         self._access_token_secret = access_token_secret
+        self._manage_rate_limits = manage_rate_limits
         self._set_oauth_1a_creds()
 
     def _set_oauth_1a_creds(self) -> None:
@@ -59,7 +63,19 @@ class OAuth1a(OAuthHandler):
         Returns:
             - requests.models.Response
         """
-        return self._oauth_1a.get(url, params=payload)
+        # Make request
+        response = self._oauth_1a.get(
+            url,
+            params=payload
+            )
+
+        # If requested, manage rate limits
+        if self._manage_rate_limits:
+            response = manage_rate_limits(response)
+        else:
+            pass
+
+        return response
 
 
 class OAuth2(OAuthHandler):
@@ -69,9 +85,11 @@ class OAuth2(OAuthHandler):
     """
     def __init__(
         self,
-        bearer_token: str= "",
+        bearer_token: str = "",
+        manage_rate_limits: bool = True
     ) -> None:
         self._bearer_token = bearer_token
+        self._manage_rate_limits = manage_rate_limits
         self._set_bearer_token()
 
     # Setters
@@ -104,8 +122,16 @@ class OAuth2(OAuthHandler):
         Returns:
             - requests.models.Response
         """
-        return requests.get(
+        response = requests.get(
             url,
             headers=self._header,
             params=payload
-        )
+            )
+
+        # If requested, manage rate limits
+        if self._manage_rate_limits:
+            response = manage_rate_limits(response)
+        else:
+            pass
+
+        return response

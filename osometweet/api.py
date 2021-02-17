@@ -1,5 +1,4 @@
 import requests
-import pause
 from typing import Union
 from datetime import datetime
 
@@ -145,6 +144,7 @@ class OsomeTweet:
             fields=fields,
             expansions=expansions
         )
+
         response = self._oauth.make_request(url, payload)
         return response.json()
 
@@ -579,59 +579,7 @@ class OsomeTweet:
             expansions=expansions
         )
 
-        # Pull Data. Wait when necessary and catching time dependent errors.
-        switch = True
         url = f"{self._base_url}/{query_specs['endpoint']}"
-        while switch:
-            # Get response
-            response = self._oauth.make_request(url, payload)
 
-            # Get number of requests left with our tokens
-            remaining_requests = int(response.headers["x-rate-limit-remaining"])
-
-            # If that number is one, we get the reset-time
-            #   and wait until then, plus 15 seconds (your welcome Twitter).
-            # The regular 429 exception is caught below as well,
-            #   however, we want to program defensively, where possible.
-            if remaining_requests == 1:
-                buffer_wait_time = 15
-                resume_time = datetime.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
-                print(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
-                pause_until(resume_time)
-
-            # Explicitly checking for time dependent errors.
-            # Most of these errors can be solved simply by waiting
-            # a little while and pinging Twitter again - so that's what we do.
-            if response.status_code != 200:
-
-                # Too many requests error
-                if response.status_code == 429:
-                    buffer_wait_time = 15
-                    resume_time = datetime.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
-                    print(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
-                    pause_until(resume_time)
-
-                # Twitter internal server error
-                elif response.status_code == 500:
-                    # Twitter needs a break, so we wait 30 seconds
-                    resume_time = datetime.now().timestamp() + 30
-                    print(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
-                    pause_until(resume_time)
-
-                # Twitter service unavailable error
-                elif response.status_code == 503:
-                    # Twitter needs a break, so we wait 30 seconds
-                    resume_time = datetime.now().timestamp() + 30
-                    print(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
-                    pause_until(resume_time)
-
-                # If we get this far, we've done something wrong and should exit
-                raise Exception(
-                    "Request returned an error: {} {}".format(
-                        response.status_code, response.text
-                    )
-                )
-
-            # Each time we get a 200 response, lets exit the function and return the response.json
-            if response.ok:
-                return response.json()
+        response = self._oauth.make_request(url, payload)
+        return response.json()
