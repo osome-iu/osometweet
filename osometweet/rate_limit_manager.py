@@ -62,11 +62,12 @@ def manage_rate_limits(response):
                 pause_until(resume_time)
 
             # If we get this far, we've done something wrong and should exit
-            raise Exception(
-                "Request returned an error: {} {}".format(
-                    response.status_code, response.text
+            else:
+                raise Exception(
+                    "Request returned an error: {} {}".format(
+                        response.status_code, response.text
+                    )
                 )
-            )
 
         # Each time we get a 200 response, exit the function and return the response object
         if response.ok:
