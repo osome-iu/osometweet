@@ -1,5 +1,8 @@
 from datetime import datetime
-from osometweet.utils import pause_until
+from osometweet.utils import get_logger, pause_until
+
+logger = get_logger(__name__)
+
 
 def manage_rate_limits(response):
     """Manage Twitter V2 Rate Limits
@@ -28,12 +31,12 @@ def manage_rate_limits(response):
             if remaining_requests == 1:
                 buffer_wait_time = 15
                 resume_time = datetime.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
-                print(f"One request from being rate limited. Waiting on Twitter.\n\tResume Time: {resume_time}")
+                logger.info(f"One request from being rate limited. Waiting on Twitter.\n\tResume Time: {resume_time}")
                 pause_until(resume_time)
         
         except Exception as e:
-            print("An x-rate-limit-* parameter is likely missing...")
-            print(e)
+            logger.info("An x-rate-limit-* parameter is likely missing...")
+            logger.info(e)
 
         # Explicitly checking for time dependent errors.
         # Most of these errors can be solved simply by waiting
@@ -44,21 +47,21 @@ def manage_rate_limits(response):
             if response.status_code == 429:
                 buffer_wait_time = 15
                 resume_time = datetime.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
-                print(f"Too many requests. Waiting on Twitter.\n\tResume Time: {resume_time}")
+                logger.info(f"Too many requests. Waiting on Twitter.\n\tResume Time: {resume_time}")
                 pause_until(resume_time)
 
             # Twitter internal server error
             elif response.status_code == 500:
                 # Twitter needs a break, so we wait 30 seconds
                 resume_time = datetime.now().timestamp() + 30
-                print(f"Internal server error @ Twitter. Giving Twitter a break...\n\tResume Time: {resume_time}")
+                logger.info(f"Internal server error @ Twitter. Giving Twitter a break...\n\tResume Time: {resume_time}")
                 pause_until(resume_time)
 
             # Twitter service unavailable error
             elif response.status_code == 503:
                 # Twitter needs a break, so we wait 30 seconds
                 resume_time = datetime.now().timestamp() + 30
-                print(f"Twitter service unavailable. Giving Twitter a break...\n\tResume Time: {resume_time}")
+                logger.info(f"Twitter service unavailable. Giving Twitter a break...\n\tResume Time: {resume_time}")
                 pause_until(resume_time)
 
             # If we get this far, we've done something wrong and should exit
