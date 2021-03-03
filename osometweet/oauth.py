@@ -101,8 +101,6 @@ class OAuth1a(OAuthHandler):
         # If requested, manage rate limits
         if self._manage_rate_limits:
             response = manage_rate_limits(response)
-        else:
-            pass
 
         return response
 
@@ -179,7 +177,5 @@ class OAuth2(OAuthHandler):
         # If requested, manage rate limits
         if self._manage_rate_limits:
             response = manage_rate_limits(response)
-        else:
-            pass
 
         return response
