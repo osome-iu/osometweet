@@ -102,6 +102,7 @@ class OsomeTweet:
     def tweet_lookup(
             self,
             tids: Union[str, list, tuple],
+            *,
             everything: bool = False,
             fields: ObjectFields = None,
             expansions: TweetExpansions = None
@@ -148,6 +149,7 @@ class OsomeTweet:
     def get_tweet_timeline(
             self,
             user_id: str,
+            *,
             everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None,
@@ -204,6 +206,7 @@ class OsomeTweet:
     def get_mentions_timeline(
             self,
             user_id: str,
+            *,
             everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None,
@@ -311,6 +314,7 @@ class OsomeTweet:
     def get_followers(
             self,
             user_id: str,
+            *,
             everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None,
@@ -340,6 +344,7 @@ class OsomeTweet:
     def get_following(
             self,
             user_id: str,
+            *,
             everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None,
@@ -370,6 +375,7 @@ class OsomeTweet:
             self,
             user_id: str,
             endpoint: str,
+            *,
             everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None,
@@ -416,6 +422,7 @@ class OsomeTweet:
     def user_lookup_ids(
             self,
             user_ids: Union[list, tuple],
+            *,
             everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None
@@ -443,6 +450,7 @@ class OsomeTweet:
     def user_lookup_usernames(
             self,
             usernames: Union[list, tuple],
+            *,
             everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None
@@ -477,6 +485,7 @@ class OsomeTweet:
             self,
             query: Union[list, tuple],
             query_type: str,
+            *,
             everything: bool = False,
             fields: ObjectFields = None,
             expansions: UserExpansions = None
