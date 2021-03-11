@@ -92,15 +92,30 @@ class OAuth1a(OAuthHandler):
         Returns:
             - requests.models.Response
         """
-        # Make request
-        response = self._oauth_1a.get(
-            url,
-            params=payload
-            )
 
         # If requested, manage rate limits
         if self._manage_rate_limits:
-            response = manage_rate_limits(response)
+            switch = True
+            while switch:
+
+                # Make request
+                response = self._oauth_1a.get(
+                    url,
+                    params=payload
+                    )
+
+                # The below returns:
+                #    True: if there was an error that we waited for,
+                #         ensuring we make the same request again
+                #    False: if there were no errors, so the while-loop breaks
+                switch = manage_rate_limits(response)
+
+        else:
+            # Make request
+            response = self._oauth_1a.get(
+                url,
+                params=payload
+                )
 
         return response
 
@@ -168,14 +183,30 @@ class OAuth2(OAuthHandler):
         Returns:
             - requests.models.Response
         """
-        response = requests.get(
-            url,
-            headers=self._header,
-            params=payload
-            )
-
         # If requested, manage rate limits
         if self._manage_rate_limits:
-            response = manage_rate_limits(response)
+            switch = True
+            while switch:
+
+                # Make request
+                response = requests.get(
+                    url,
+                    headers=self._header,
+                    params=payload
+                    )
+
+                # The below returns:
+                #    True: if there was an error that we waited for,
+                #         ensuring we make the same request again
+                #    False: if there were no errors, so the while-loop breaks
+                switch = manage_rate_limits(response)
+
+        else:
+            # Make request
+            response = requests.get(
+                url,
+                headers=self._header,
+                params=payload
+                )
 
         return response

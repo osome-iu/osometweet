@@ -3,7 +3,6 @@ from osometweet.utils import get_logger, pause_until
 
 logger = get_logger(__name__)
 
-
 def manage_rate_limits(response):
     """Manage Twitter V2 Rate Limits
 
@@ -16,62 +15,111 @@ def manage_rate_limits(response):
     Twitter Reference: https://developer.twitter.com/en/support/twitter-api/error-troubleshooting
 
     """
-    while True:
 
-        # The x-rate-limit-remaining parameter is not always present.
-        #    If it is, we want to use it.
-        try:
-            # Get number of requests left with our tokens
-            remaining_requests = int(response.headers["x-rate-limit-remaining"])
 
-            # If that number is one, we get the reset-time
-            #   and wait until then, plus 15 seconds (your welcome Twitter).
-            # The regular 429 exception is caught below as well,
-            #   however, we want to program defensively, where possible.
-            if remaining_requests == 1:
+    # The x-rate-limit-remaining parameter is not always present.
+    #    If it is, we want to use it.
+    try:
+        # Get number of requests left with our tokens
+        remaining_requests = int(response.headers["x-rate-limit-remaining"])
+
+        # If that number is below 3, we try to get the reset-time
+        #   and wait until then, plus 15 seconds (your welcome Twitter).
+        # The regular 429 exception is caught below as well,
+        #   however, we want to program defensively, where possible.
+        # We check if requests are below 3 since this safety net is apparently
+        #   not super reliable.
+        if remaining_requests < 3:
+            logger.info("Running out of requests...")
+            buffer_wait_time = 15
+            resume_time = datetime.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
+            logger.info(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
+            pause_until(resume_time)
+            return True
+    
+    except Exception as e:
+        logger.info("An x-rate-limit-* parameter is likely missing...")
+        logger.info(e)
+
+
+    # It seems like Twitter's HTTP status code system is also buggy so we need to manually check
+    # for the error code no matter what.
+    #    Ref: https://twittercommunity.com/t/proper-way-to-handle-rate-limits/150272/5
+    if "errors" in response.json:
+
+        if any([error["code"] == 88 for error in response.json["errors"]]):
+            logger.info("Too many requests.")
+            try:
                 buffer_wait_time = 15
                 resume_time = datetime.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
-                logger.info(f"One request from being rate limited. Waiting on Twitter.\n\tResume Time: {resume_time}")
+                logger.info(f"Waiting on Twitter.\n\tResume Time: {resume_time}")
                 pause_until(resume_time)
-        
-        except Exception as e:
-            logger.info("An x-rate-limit-* parameter is likely missing...")
-            logger.info(e)
+                return True
 
-        # Explicitly checking for time dependent errors.
-        # Most of these errors can be solved simply by waiting
-        # a little while and pinging Twitter again - so that's what we do.
-        if response.status_code != 200:
-
-            # Too many requests error
-            if response.status_code == 429:
-                buffer_wait_time = 15
-                resume_time = datetime.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
-                logger.info(f"Too many requests. Waiting on Twitter.\n\tResume Time: {resume_time}")
+            # If there is no x-rate-limit-reset a KeyError should be thrown
+            #   In this case, we just wait 5 minutes by default
+            except KeyError:
+                logger.info("An x-rate-limit-* parameter is likely missing...")
+                logger.info(e)
+                resume_time = datetime.now().timestamp() + (60 * 5)
                 pause_until(resume_time)
+                return True
 
-            # Twitter internal server error
-            elif response.status_code == 500:
-                # Twitter needs a break, so we wait 30 seconds
-                resume_time = datetime.now().timestamp() + 30
-                logger.info(f"Internal server error @ Twitter. Giving Twitter a break...\n\tResume Time: {resume_time}")
-                pause_until(resume_time)
-
-            # Twitter service unavailable error
-            elif response.status_code == 503:
-                # Twitter needs a break, so we wait 30 seconds
-                resume_time = datetime.now().timestamp() + 30
-                logger.info(f"Twitter service unavailable. Giving Twitter a break...\n\tResume Time: {resume_time}")
-                pause_until(resume_time)
-
-            # If we get this far, we've done something wrong and should exit
-            else:
+            except:
                 raise Exception(
-                    "Request returned an error: {} {}".format(
-                        response.status_code, response.text
+                    "Rate limit error detected.\n\n",
+                    "Tried waiting some period of time but there appears to be another error!!",
+                    "To avoid potential suspension due to ignoring rate limit warnings, we break the program."
                     )
-                )
 
-        # Each time we get a 200 response, exit the function and return the response object
-        if response.ok:
-            return response
+
+    # Explicitly checking for time dependent errors.
+    # Most of these errors can be solved simply by waiting
+    # a little while and pinging Twitter again - so that's what we do.
+    if response.status_code != 200:
+
+        # Too many requests error
+        if response.status_code == 429:
+            logger.info(f"Too many requests...")
+            buffer_wait_time = 15
+            try:
+                """Try to use the x-rate-limit-reset to wait on Twitter"""
+                resume_time = datetime.fromtimestamp( int(response.headers["x-rate-limit-reset"]) + buffer_wait_time )
+                logger.info(f"\n\tResume Time: {resume_time}")
+                pause_until(resume_time)
+                return True
+
+            except:
+                # x-rate-limit was missing, so we just default to a 5 minute wait
+                resume_time = datetime.now().timestamp() + (60 * 5)
+                logger.info(f"\n\tResume Time: {resume_time}")
+                pause_until(resume_time)
+                return True
+
+        # Twitter internal server error
+        elif response.status_code == 500:
+            # Twitter needs a break, so we wait 30 seconds
+            resume_time = datetime.now().timestamp() + 30
+            logger.info(f"Internal server error @ Twitter. Giving Twitter a break...\n\tResume Time: {resume_time}")
+            pause_until(resume_time)
+            return True
+
+        # Twitter service unavailable error
+        elif response.status_code == 503:
+            # Twitter needs a break, so we wait 30 seconds
+            resume_time = datetime.now().timestamp() + 30
+            logger.info(f"Twitter service unavailable. Giving Twitter a break...\n\tResume Time: {resume_time}")
+            pause_until(resume_time)
+            return True
+
+        # If we get this far, we've done something wrong and should exit
+        else:
+            raise Exception(
+                "Request returned an error: {} {}".format(
+                    response.status_code, response.text
+                )
+            )
+
+    # Each time we get a 200 response, exit the function and return False to break the while-loop
+    if response.ok:
+        return False
