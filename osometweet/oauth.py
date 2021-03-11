@@ -188,13 +188,13 @@ class OAuth2(OAuthHandler):
                 "Invalid type for parameter bearer_token, must be a string"
             )
 
-    def make_request(
+    def _make_one_request(
         self,
         url: str,
         payload: dict
     ) -> requests.models.Response:
         """
-        Method to make the http request to Twitter API
+        Method to make one http request to Twitter API
 
         Parameters:
             - url (str) - url of the endpoint
