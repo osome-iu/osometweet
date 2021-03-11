@@ -45,9 +45,11 @@ def manage_rate_limits(response):
     # It seems like Twitter's HTTP status code system is also buggy so we need to manually check
     # for the error code no matter what.
     #    Ref: https://twittercommunity.com/t/proper-way-to-handle-rate-limits/150272/5
-    if "errors" in response.json:
+    if "errors" in response.json():
+        # Return the json object so you can see the errors (leave in while we work the quirks out)
+        logger.info(response.json())
 
-        if any([error["code"] == 88 for error in response.json["errors"]]):
+        if any([error["code"] == 88 for error in response.json()["errors"]]):
             logger.info("Too many requests.")
             try:
                 buffer_wait_time = 15
