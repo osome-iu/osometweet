@@ -7,8 +7,46 @@ class OAuthHandler:
     def __init__(self):
         pass
 
-    def make_request(self):
-        pass
+    def make_request(
+        self,
+        url: str,
+        payload: dict
+       ) -> requests.models.Response:
+        """
+        Method to make the http request to Twitter API
+
+        Parameters:
+            - url (str) - url of the endpoint
+            - payload (dict) - payload of the request
+        Returns:
+            - requests.models.Response
+        """
+
+        # If requested, manage rate limits
+        if self._manage_rate_limits:
+            switch = True
+            while switch:
+
+                # Make one request
+                response = self._make_one_request(
+                    url,
+                    payload=payload
+                    )
+
+                # The below returns:
+                #    True: if there was an error that we waited for,
+                #         ensuring we make the same request again
+                #    False: if there were no errors, so the while-loop breaks
+                switch = manage_rate_limits(response)
+
+        else:
+            # Make request
+            response = self._make_one_request(
+                url,
+                params=payload
+                )
+
+        return response
 
 
 class OAuth1a(OAuthHandler):
@@ -50,6 +88,7 @@ class OAuth1a(OAuthHandler):
         manage_rate_limits: bool = True
 
     ) -> None:
+        super(OAuth1a, self).__init__()
         self._api_key = api_key
         self._api_key_secret = api_key_secret
         self._access_token = access_token
@@ -78,13 +117,13 @@ class OAuth1a(OAuthHandler):
             resource_owner_secret = self._access_token_secret
             )
 
-    def make_request(
+    def _make_one_request(
         self,
         url: str,
         payload: dict
        ) -> requests.models.Response:
         """
-        Method to make the http request to Twitter API
+        Method to make one http request to Twitter API
 
         Parameters:
             - url (str) - url of the endpoint
@@ -92,16 +131,10 @@ class OAuth1a(OAuthHandler):
         Returns:
             - requests.models.Response
         """
-        # Make request
         response = self._oauth_1a.get(
             url,
             params=payload
             )
-
-        # If requested, manage rate limits
-        if self._manage_rate_limits:
-            response = manage_rate_limits(response)
-
         return response
 
 
@@ -134,6 +167,7 @@ class OAuth2(OAuthHandler):
         bearer_token: str = "",
         manage_rate_limits: bool = True
     ) -> None:
+        super(OAuth2, self).__init__()
         self._bearer_token = bearer_token
         self._manage_rate_limits = manage_rate_limits
         self._set_bearer_token()
@@ -154,13 +188,13 @@ class OAuth2(OAuthHandler):
                 "Invalid type for parameter bearer_token, must be a string"
             )
 
-    def make_request(
+    def _make_one_request(
         self,
         url: str,
         payload: dict
     ) -> requests.models.Response:
         """
-        Method to make the http request to Twitter API
+        Method to make one http request to Twitter API
 
         Parameters:
             - url (str) - url of the endpoint
@@ -173,9 +207,4 @@ class OAuth2(OAuthHandler):
             headers=self._header,
             params=payload
             )
-
-        # If requested, manage rate limits
-        if self._manage_rate_limits:
-            response = manage_rate_limits(response)
-
         return response
