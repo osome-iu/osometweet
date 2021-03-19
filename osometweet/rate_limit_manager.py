@@ -56,7 +56,7 @@ def manage_rate_limits(response):
 
         # Create a list of the code integers
         codes = []
-        for dic in error_codes:
+        for dic in code_message_dict:
             codes.extend([val for key,val in dic.items() if key == "code"])
 
         if any([code == 88 for code in codes]):
