@@ -86,6 +86,7 @@ def manage_rate_limits(response):
 
         else:
             logger.info("None of those errors were rate-limit errors.")
+            return False
 
 
     # Explicitly checking for time dependent errors.
