@@ -47,9 +47,19 @@ def manage_rate_limits(response):
     #    Ref: https://twittercommunity.com/t/proper-way-to-handle-rate-limits/150272/5
     if "errors" in response.json():
         # Return the json object so you can see the errors (leave in while we work the quirks out)
+        logger.info("Response JSON contains 'errors' object.")
         logger.info(response.json())
 
-        if any([error["code"] == 88 for error in response.json()["errors"]]):
+        # Lots of information is returned in the 'errors' object by Twitter
+        #   that are not official errors. This removes only those with codes
+        code_message_dict = [dic for dic in response["errors"] if "code" in dic]
+
+        # Create a list of the code integers
+        codes = []
+        for dic in error_codes:
+            codes.extend([val for key,val in dic.items() if key == "code"])
+
+        if any([code == 88 for code in codes]):
             logger.info("Too many requests.")
             try:
                 buffer_wait_time = 15
@@ -73,6 +83,9 @@ def manage_rate_limits(response):
                     "Tried waiting some period of time but there appears to be another error!!",
                     "To avoid potential suspension due to ignoring rate limit warnings, we break the program."
                     )
+
+        else:
+            logger.info("None of those errors were rate-limit errors.")
 
 
     # Explicitly checking for time dependent errors.
@@ -122,6 +135,5 @@ def manage_rate_limits(response):
                 )
             )
 
-    # Each time we get a 200 response, exit the function and return False to break the while-loop
-    if response.ok:
-        return False
+    # If we get this far, we should be error-free
+    return False
