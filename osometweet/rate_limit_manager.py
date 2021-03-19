@@ -52,7 +52,7 @@ def manage_rate_limits(response):
 
         # Lots of information is returned in the 'errors' object by Twitter
         #   that are not official errors. This removes only those with codes
-        code_message_dict = [dic for dic in response["errors"] if "code" in dic]
+        code_message_dict = [dic for dic in response.json()["errors"] if "code" in dic]
 
         # Create a list of the code integers
         codes = []
