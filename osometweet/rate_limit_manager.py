@@ -48,7 +48,7 @@ def manage_rate_limits(response):
     if "errors" in response.json():
         # Return the json object so you can see the errors (leave in while we work the quirks out)
         logger.info("Response JSON contains 'errors' object.")
-        logger.info(response.json()["errors"])
+        #logger.info(response.json()["errors"])
 
         # Lots of information is returned in the 'errors' object by Twitter
         #   that are not official errors. This removes only those with codes
