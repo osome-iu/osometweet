@@ -20,7 +20,7 @@ The [Wiki](https://github.com/osome-iu/osometweet/wiki) includes a detailed docu
 pip install osometweet
 ```
 
-**Warning 1**: The package is still in development, so not all endpoints are included and those which are included may not be 100% robust. Please see the list of issues for any known problems. 
+**Warning 1**: The package is still in development, so not all endpoints are included and those which are included may not be 100% robust. Please see the list of issues for known problems. 
 
 **Warning 2**: We will try to keep the interface of the package consistent, but there maybe drastic changes in the future.
 
