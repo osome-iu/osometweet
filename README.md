@@ -31,7 +31,7 @@ To ensure that you are using the latest features and functionalities, you can in
 
 To do so, clone this project, go to the source directory, and run `pip install -e .` 
 
-It should look something like the below, run from your command line
+If you want to do this with `git` it should look something like the below, run from your command line:
 
 ```bash
 git clone https://github.com/osome-iu/osometweet.git
