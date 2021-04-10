@@ -27,7 +27,7 @@ pip install osometweet
 #### Use the newest features & local development
 
 The PyPI version may be behind the GitHub version.
-To ensure that you are using the latest newest features and functionalities, you can install the GitHub version locally.
+To ensure that you are using the latest features and functionalities, you can install the GitHub version locally.
 
 To do so, clone this project, go to the source directory, and run `pip install -e .` 
 
