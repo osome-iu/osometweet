@@ -71,8 +71,7 @@ def manage_rate_limits(response):
             # If there is no x-rate-limit-reset a KeyError should be thrown
             #   In this case, we just wait 5 minutes by default
             except KeyError:
-                logger.info("An x-rate-limit-* parameter is likely missing...")
-                logger.info(e)
+                logger.exception("An x-rate-limit-* parameter is likely missing...")
                 resume_time = datetime.now().timestamp() + (60 * 5)
                 pause_until(resume_time)
                 return True
