@@ -20,18 +20,22 @@ The [Wiki](https://github.com/osome-iu/osometweet/wiki) includes a detailed docu
 pip install osometweet
 ```
 
-**Warning 1**: the package is still in development, so the functionalities are very limited and the robustness is low.
+**Warning 1**: The package is still in development, so not all endpoints are included and those which are included may not be 100% robust. Please see the list of issues for known problems. 
 
-**Warning 2**: we will try to keep the interface of the package consistent, but there maybe drastic changes in the future.
+**Warning 2**: We will try to keep the interface of the package consistent, but there maybe drastic changes in the future.
 
 #### Use the newest features & local development
 
-The PyPI version is behind the GitHub version.
-To take advantage of the newest features and functionalities, you can install the GitHub version locally.
+The PyPI version may be behind the GitHub version.
+To ensure that you are using the latest features and functionalities, you can install the GitHub version locally.
 
-To do so, clone this project, go to the source directory, type the following command to install the package locally:
+To do so, clone this project, go to the source directory, and run `pip install -e .` 
+
+If you want to do this with `git` it should look something like the below, run from your command line:
 
 ```bash
+git clone https://github.com/osome-iu/osometweet.git
+cd ./osometweet
 pip install -e .
 ```
 
