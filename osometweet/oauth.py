@@ -9,13 +9,15 @@ class OAuthHandler:
 
     def make_request(
         self,
+        method: str,
         url: str,
         payload: dict
        ) -> requests.models.Response:
         """
-        Method to make the http request to Twitter API
+        Method to make the HTTP request to Twitter API
 
         Parameters:
+            - method (str) - HTTP request method
             - url (str) - url of the endpoint
             - payload (dict) - payload of the request
         Returns:
@@ -29,6 +31,7 @@ class OAuthHandler:
 
                 # Make one request
                 response = self._make_one_request(
+                    method,
                     url,
                     payload=payload
                     )
@@ -42,8 +45,9 @@ class OAuthHandler:
         else:
             # Make request
             response = self._make_one_request(
+                method,
                 url,
-                params=payload
+                payload=payload
                 )
 
         return response
@@ -119,22 +123,30 @@ class OAuth1a(OAuthHandler):
 
     def _make_one_request(
         self,
+        method: str,
         url: str,
         payload: dict
        ) -> requests.models.Response:
         """
-        Method to make one http request to Twitter API
+        Method to make one HTTP request to Twitter API
 
         Parameters:
+            - method (str) - HTTP request method
             - url (str) - url of the endpoint
             - payload (dict) - payload of the request
         Returns:
             - requests.models.Response
         """
-        response = self._oauth_1a.get(
-            url,
-            params=payload
-            )
+        if method.upper() == 'GET':
+            response = self._oauth_1a.get(
+                url,
+                params=payload
+                )
+        elif method.upper() == 'POST':
+            response = self._oauth_1a.post(
+                url,
+                params=payload
+                )            
         return response
 
 
@@ -190,19 +202,22 @@ class OAuth2(OAuthHandler):
 
     def _make_one_request(
         self,
+        method: str,
         url: str,
         payload: dict
     ) -> requests.models.Response:
         """
-        Method to make one http request to Twitter API
+        Method to make one HTTP request to Twitter API
 
         Parameters:
+            - method (str) - HTTP request method
             - url (str) - url of the endpoint
             - payload (dict) - payload of the request
         Returns:
             - requests.models.Response
         """
-        response = requests.get(
+        response = requests.request(
+            method,
             url,
             headers=self._header,
             params=payload

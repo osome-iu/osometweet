@@ -7,7 +7,7 @@ api_key = os.environ.get('TWITTER_API_KEY', '')
 api_key_secret = os.environ.get('TWITTER_API_KEY_SECRET', '')
 access_token = os.environ.get('TWITTER_ACCESS_TOKEN', '')
 access_token_secret = os.environ.get('TWITTER_ACCESS_TOKEN_SECRET', '')
-bearer_token = os.environ.get("TWITTER_BEARER_TOKEN")
+bearer_token = os.environ.get('TWITTER_BEARER_TOKEN', '')
 
 class TestOauth(unittest.TestCase):
     """
@@ -22,6 +22,7 @@ class TestOauth(unittest.TestCase):
         )
         test_tweet_id = '1323314485705297926'
         resp = oauth1a.make_request(
+            'GET',
             'https://api.twitter.com/2/tweets',
             {"ids": f"{test_tweet_id}"}
             ).json()
@@ -42,6 +43,7 @@ class TestOauth(unittest.TestCase):
         oauth2 = osometweet.OAuth2(bearer_token=bearer_token)
         test_tweet_id = '1323314485705297926'
         resp = oauth2.make_request(
+            'GET',
             'https://api.twitter.com/2/tweets',
             {"ids": f"{test_tweet_id}"}
             ).json()
