@@ -245,7 +245,7 @@ class OsomeTweet:
         # Add kwargs
         payload.update(kwargs)
 
-        response = self._oauth.make_request(url, payload)
+        response = self._oauth.make_request('GET', url, payload)
         return response.json()
 
     ########################################
@@ -298,7 +298,7 @@ class OsomeTweet:
             expansions=expansions
         )
 
-        response = self._oauth.make_request(url, payload)
+        response = self._oauth.make_request('GET', url, payload)
         return response.json()
 
     def get_tweet_timeline(
@@ -465,7 +465,7 @@ class OsomeTweet:
         )
         payload.update(kwargs)
 
-        response = self._oauth.make_request(url, payload)
+        response = self._oauth.make_request('GET', url, payload)
         return response.json()
 
     ########################################
@@ -602,7 +602,7 @@ class OsomeTweet:
         )
         payload.update(kwargs)
 
-        response = self._oauth.make_request(url, payload)
+        response = self._oauth.make_request('GET', url, payload)
         return response.json()
 
     def user_lookup_ids(
@@ -742,5 +742,5 @@ class OsomeTweet:
 
         url = f"{self._base_url}/{query_specs['endpoint']}"
 
-        response = self._oauth.make_request(url, payload)
+        response = self._oauth.make_request('GET', url, payload)
         return response.json()
