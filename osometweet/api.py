@@ -1,9 +1,18 @@
 import requests
-from typing import Union
+from typing import Union, Generator
 from datetime import datetime
 
 from .oauth import OAuthHandler
-from .fields import ObjectFields, ObjectFieldsBase, UserFields, TweetFields, MediaFields, PollFields, PlaceFields
+
+from .fields import (
+    ObjectFields,
+    ObjectFieldsBase,
+    UserFields,
+    TweetFields,
+    MediaFields,
+    PollFields,
+    PlaceFields,
+)
 from .expansions import ObjectExpansions, TweetExpansions, UserExpansions
 
 from osometweet.utils import get_logger, pause_until
@@ -13,9 +22,7 @@ logger = get_logger(__name__)
 
 class OsomeTweet:
     def __init__(
-        self,
-        oauth: OAuthHandler,
-        base_url: str = "https://api.twitter.com/2",
+        self, oauth: OAuthHandler, base_url: str = "https://api.twitter.com/2",
     ) -> None:
         self._oauth = oauth
         # A lot of endpoints can only receive payload paremeters specific
@@ -46,13 +53,13 @@ class OsomeTweet:
             raise ValueError("Invalid type for parameter base_url, must be a string")
 
     def _decorate_payload(
-            self,
-            payload: dict = None,
-            endpoint_type: str = None,
-            everything: bool = False,
-            fields: ObjectFields = None,
-            expansions: ObjectExpansions = None
-        ) -> dict:
+        self,
+        payload: dict = None,
+        endpoint_type: str = None,
+        everything: bool = False,
+        fields: ObjectFields = None,
+        expansions: ObjectExpansions = None,
+    ) -> dict:
         """
         Method to add fields and expansions to the payload.
         If the `everything` is set to True, then all optional fields and expansions will be returned regardless of the values of `fields` and `expansions`.
@@ -70,20 +77,21 @@ class OsomeTweet:
             payload = dict()
 
         if everything:
-            if endpoint_type == 'user':
-                fields = sum([
-                    TweetFields(everything=True),
-                    UserFields(everything=True)
-                ])
+            if endpoint_type == "user":
+                fields = sum(
+                    [TweetFields(everything=True), UserFields(everything=True)]
+                )
                 expansions = UserExpansions()
-            elif endpoint_type == 'tweet':
-                fields = sum([
-                    TweetFields(everything=True),
-                    UserFields(everything=True),
-                    MediaFields(everything=True),
-                    PollFields(everything=True),
-                    PlaceFields(everything=True)
-                ])
+            elif endpoint_type == "tweet":
+                fields = sum(
+                    [
+                        TweetFields(everything=True),
+                        UserFields(everything=True),
+                        MediaFields(everything=True),
+                        PollFields(everything=True),
+                        PlaceFields(everything=True),
+                    ]
+                )
                 expansions = TweetExpansions()
             else:
                 logger.error("Invalid endpoint type, must be 'user' or 'tweet'.")
@@ -100,14 +108,14 @@ class OsomeTweet:
     ########################################
     # Search endpoints
     def search(
-            self,
-            query: str = None,
-            everything: bool = False,
-            fields: ObjectFields = None,
-            expansions: TweetExpansions = None,
-            full_archive_search: bool = False,
-            **kwargs
-        ) -> dict:
+        self,
+        query: str = None,
+        everything: bool = False,
+        fields: ObjectFields = None,
+        expansions: TweetExpansions = None,
+        full_archive_search: bool = False,
+        **kwargs,
+    ) -> dict:
         """
         Return tweets matching a search query. Use either the Recent Search or
             Full Archive Search endpoints via full_archive_search parameter.
@@ -206,9 +214,10 @@ class OsomeTweet:
         """
         # Set url and initialize payload with query
         if not isinstance(full_archive_search, bool):
-            raise ValueError("Invalid type for paratmer `full_archive_search`, must be a"\
+            raise ValueError(
+                "Invalid type for paratmer `full_archive_search`, must be a"
                 "boolean object (i.e.,True or False)."
-                )
+            )
         if full_archive_search:
             url = f"{self._base_url}/tweets/search/all"
 
@@ -217,8 +226,10 @@ class OsomeTweet:
                 if len(query) <= 1024:
                     payload = {"query": query}
                 else:
-                    raise Exception(f"Query length too long for academic search endpoint. "\
-                        f"Current query = {len(query)}. Must be <= 1024.")
+                    raise Exception(
+                        f"Query length too long for academic search endpoint. "
+                        f"Current query = {len(query)}. Must be <= 1024."
+                    )
             else:
                 raise ValueError("Query must be passed as a single string.")
         else:
@@ -229,36 +240,38 @@ class OsomeTweet:
                 if len(query) <= 512:
                     payload = {"query": query}
                 else:
-                    raise Exception(f"Query length too long for standard search endpoint. "\
-                        f"Current query = {len(query)}. Must be <= 512.")
+                    raise Exception(
+                        f"Query length too long for standard search endpoint. "
+                        f"Current query = {len(query)}. Must be <= 512."
+                    )
             else:
                 raise ValueError("Query must be passed as a single string.")
 
         # Populate payload object w/ fields and expansions
         payload = self._decorate_payload(
             payload=payload,
-            endpoint_type='tweet',
+            endpoint_type="tweet",
             everything=everything,
             fields=fields,
-            expansions=expansions
+            expansions=expansions,
         )
         # Add kwargs
         payload.update(kwargs)
 
-        response = self._oauth.make_request('GET', url, payload)
+        response = self._oauth.make_request("GET", url, payload, stream=False)
         return response.json()
 
     ########################################
     ########################################
     # Tweet endpoints
     def tweet_lookup(
-            self,
-            tids: Union[str, list, tuple],
-            *,
-            everything: bool = False,
-            fields: ObjectFields = None,
-            expansions: TweetExpansions = None
-        ) -> dict:
+        self,
+        tids: Union[str, list, tuple],
+        *,
+        everything: bool = False,
+        fields: ObjectFields = None,
+        expansions: TweetExpansions = None,
+    ) -> dict:
         """
         Looks-up at least one tweet using its tweet id.
         Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/api-reference/get-tweets
@@ -292,24 +305,24 @@ class OsomeTweet:
         url = f"{self._base_url}/tweets"
         payload = self._decorate_payload(
             payload=payload,
-            endpoint_type='tweet',
+            endpoint_type="tweet",
             everything=everything,
             fields=fields,
-            expansions=expansions
+            expansions=expansions,
         )
 
-        response = self._oauth.make_request('GET', url, payload)
+        response = self._oauth.make_request("GET", url, payload, stream=False)
         return response.json()
 
     def get_tweet_timeline(
-            self,
-            user_id: str,
-            *,
-            everything: bool = False,
-            fields: ObjectFields = None,
-            expansions: UserExpansions = None,
-            **kwargs
-        ) -> dict:
+        self,
+        user_id: str,
+        *,
+        everything: bool = False,
+        fields: ObjectFields = None,
+        expansions: UserExpansions = None,
+        **kwargs,
+    ) -> dict:
         """
         Returns Tweets composed by a single user, specified by the requested user ID.
             - Max: 3200 most recent tweets (using pagination_token)
@@ -356,17 +369,24 @@ class OsomeTweet:
             - Exception
             - ValueError
         """
-        return self._timeline_lookup(user_id, "tweets", everything=everything, fields=fields, expansions=expansions, **kwargs)
+        return self._timeline_lookup(
+            user_id,
+            "tweets",
+            everything=everything,
+            fields=fields,
+            expansions=expansions,
+            **kwargs,
+        )
 
     def get_mentions_timeline(
-            self,
-            user_id: str,
-            *,
-            everything: bool = False,
-            fields: ObjectFields = None,
-            expansions: UserExpansions = None,
-            **kwargs
-        ) -> dict:
+        self,
+        user_id: str,
+        *,
+        everything: bool = False,
+        fields: ObjectFields = None,
+        expansions: UserExpansions = None,
+        **kwargs,
+    ) -> dict:
         """
         Returns Tweets mentioning a single user specified by the requested user ID.
             - Max: 800 most recent tweets (using pagination_token)
@@ -413,17 +433,24 @@ class OsomeTweet:
             - Exception
             - ValueError
         """
-        return self._timeline_lookup(user_id, "mentions", everything=everything, fields=fields, expansions=expansions, **kwargs)
+        return self._timeline_lookup(
+            user_id,
+            "mentions",
+            everything=everything,
+            fields=fields,
+            expansions=expansions,
+            **kwargs,
+        )
 
     def _timeline_lookup(
-            self,
-            user_id: str,
-            endpoint: str,
-            everything: bool = False,
-            fields: ObjectFields = None,
-            expansions: UserExpansions = None,
-            **kwargs
-        ) -> dict:
+        self,
+        user_id: str,
+        endpoint: str,
+        everything: bool = False,
+        fields: ObjectFields = None,
+        expansions: UserExpansions = None,
+        **kwargs,
+    ) -> dict:
         """
         Return tweets sent by (Timeline) or mentioning (Mentions) a specific user ID.
             - Max (Timeline): 3200 most recent tweets (using pagination_token)
@@ -458,28 +485,28 @@ class OsomeTweet:
         url = f"{self._base_url}/users/{user_id}/{endpoint}"
         # Create payload.
         payload = self._decorate_payload(
-            endpoint_type='tweet',
+            endpoint_type="tweet",
             everything=everything,
             fields=fields,
-            expansions=expansions
+            expansions=expansions,
         )
         payload.update(kwargs)
 
-        response = self._oauth.make_request('GET', url, payload)
+        response = self._oauth.make_request("GET", url, payload, stream=False)
         return response.json()
 
     ########################################
     ########################################
     # User endpoints
     def get_followers(
-            self,
-            user_id: str,
-            *,
-            everything: bool = False,
-            fields: ObjectFields = None,
-            expansions: UserExpansions = None,
-            **kwargs
-        ) -> dict:
+        self,
+        user_id: str,
+        *,
+        everything: bool = False,
+        fields: ObjectFields = None,
+        expansions: UserExpansions = None,
+        **kwargs,
+    ) -> dict:
         """
         Return a list of users who are followers of the specified user ID.
             - Max: 1000 user objects per query
@@ -511,17 +538,24 @@ class OsomeTweet:
             - Exception
             - ValueError
         """
-        return self._follows_lookup(user_id, "followers", everything=everything, fields=fields, expansions=expansions, **kwargs)
+        return self._follows_lookup(
+            user_id,
+            "followers",
+            everything=everything,
+            fields=fields,
+            expansions=expansions,
+            **kwargs,
+        )
 
     def get_following(
-            self,
-            user_id: str,
-            *,
-            everything: bool = False,
-            fields: ObjectFields = None,
-            expansions: UserExpansions = None,
-            **kwargs
-        ) -> dict:
+        self,
+        user_id: str,
+        *,
+        everything: bool = False,
+        fields: ObjectFields = None,
+        expansions: UserExpansions = None,
+        **kwargs,
+    ) -> dict:
         """
         Return a list of users the specified user ID is following.
             - Max: 1000 user objects per query
@@ -553,18 +587,25 @@ class OsomeTweet:
             - Exception
             - ValueError
         """
-        return self._follows_lookup(user_id, "following", everything=everything, fields=fields, expansions=expansions, **kwargs)
+        return self._follows_lookup(
+            user_id,
+            "following",
+            everything=everything,
+            fields=fields,
+            expansions=expansions,
+            **kwargs,
+        )
 
     def _follows_lookup(
-            self,
-            user_id: str,
-            endpoint: str,
-            *,
-            everything: bool = False,
-            fields: ObjectFields = None,
-            expansions: UserExpansions = None,
-            **kwargs
-        ) -> dict:
+        self,
+        user_id: str,
+        endpoint: str,
+        *,
+        everything: bool = False,
+        fields: ObjectFields = None,
+        expansions: UserExpansions = None,
+        **kwargs,
+    ) -> dict:
         """
         Return a list of users who are followers of or followed by the specified user ID.
             - Max: 1000 user objects per query
@@ -595,24 +636,24 @@ class OsomeTweet:
         url = f"{self._base_url}/users/{user_id}/{endpoint}"
         # Create payload.
         payload = self._decorate_payload(
-            endpoint_type='user',
+            endpoint_type="user",
             everything=everything,
             fields=fields,
-            expansions=expansions
+            expansions=expansions,
         )
         payload.update(kwargs)
 
-        response = self._oauth.make_request('GET', url, payload)
+        response = self._oauth.make_request("GET", url, payload, stream=False)
         return response.json()
 
     def user_lookup_ids(
-            self,
-            user_ids: Union[list, tuple],
-            *,
-            everything: bool = False,
-            fields: ObjectFields = None,
-            expansions: UserExpansions = None
-        ) -> dict:
+        self,
+        user_ids: Union[list, tuple],
+        *,
+        everything: bool = False,
+        fields: ObjectFields = None,
+        expansions: UserExpansions = None,
+    ) -> dict:
         """
         Looks-up user account information using unique user account id numbers.
         User fields included by default match the default parameters returned by Twitter.
@@ -634,16 +675,18 @@ class OsomeTweet:
             - Exception
             - ValueError
         """
-        return self._user_lookup(user_ids, "id", everything=everything, fields=fields, expansions=expansions)
+        return self._user_lookup(
+            user_ids, "id", everything=everything, fields=fields, expansions=expansions
+        )
 
     def user_lookup_usernames(
-            self,
-            usernames: Union[list, tuple],
-            *,
-            everything: bool = False,
-            fields: ObjectFields = None,
-            expansions: UserExpansions = None
-        ) -> dict:
+        self,
+        usernames: Union[list, tuple],
+        *,
+        everything: bool = False,
+        fields: ObjectFields = None,
+        expansions: UserExpansions = None,
+    ) -> dict:
         """
         Looks-up user account information using account usernames.
         User fields included by default match the default parameters returned by Twitter.
@@ -667,21 +710,27 @@ class OsomeTweet:
         """
         cleaned_usernames = []
         for username in usernames:
-            if username.startswith('@'):
+            if username.startswith("@"):
                 cleaned_usernames.append(username[1:])
             else:
                 cleaned_usernames.append(username)
-        return self._user_lookup(cleaned_usernames, "username", everything=everything, fields=fields, expansions=expansions)
+        return self._user_lookup(
+            cleaned_usernames,
+            "username",
+            everything=everything,
+            fields=fields,
+            expansions=expansions,
+        )
 
     def _user_lookup(
-            self,
-            query: Union[list, tuple],
-            query_type: str,
-            *,
-            everything: bool = False,
-            fields: ObjectFields = None,
-            expansions: UserExpansions = None
-        ) -> dict:
+        self,
+        query: Union[list, tuple],
+        query_type: str,
+        *,
+        everything: bool = False,
+        fields: ObjectFields = None,
+        expansions: UserExpansions = None,
+    ) -> dict:
         """
         Looks-up user account information using unique user id numbers.
         User fields included by default match the default parameters from twitter.
@@ -704,16 +753,12 @@ class OsomeTweet:
             - ValueError
         """
         query_specs = {
-            "id": {
-                "phrase": "user ids",
-                "parameter_name": "ids",
-                "endpoint": "users"
-            },
+            "id": {"phrase": "user ids", "parameter_name": "ids", "endpoint": "users"},
             "username": {
                 "phrase": "usernames",
                 "parameter_name": "usernames",
-                "endpoint": "users/by"
-            }
+                "endpoint": "users/by",
+            },
         }.get(query_type)
 
         # Check type of query and user_fields
@@ -725,22 +770,94 @@ class OsomeTweet:
         # Make sure the query is no longer than 100
         if len(query) <= 100:
             # create payload.
-            payload = {
-                query_specs["parameter_name"]: f"{','.join(query)}"
-            }
+            payload = {query_specs["parameter_name"]: f"{','.join(query)}"}
         else:
-            raise Exception(f"You passed {len(query)} {query_specs['phrase']}. \
-                This exceeds the maximum for a single query, 100")
+            raise Exception(
+                f"You passed {len(query)} {query_specs['phrase']}. \
+                This exceeds the maximum for a single query, 100"
+            )
 
         payload = self._decorate_payload(
             payload=payload,
-            endpoint_type='user',
+            endpoint_type="user",
             everything=everything,
             fields=fields,
-            expansions=expansions
+            expansions=expansions,
         )
 
         url = f"{self._base_url}/{query_specs['endpoint']}"
 
-        response = self._oauth.make_request('GET', url, payload)
+        response = self._oauth.make_request("GET", url, payload, stream=False)
         return response.json()
+
+    def sampled_stream(
+        self,
+        everything: bool = False,
+        fields: ObjectFields = None,
+        expansions: UserExpansions = None,
+    ) -> Generator[bytes, None, None]:
+
+        """
+        Streams a random 1% sample of all the tweets.
+        User fields included by default match the default parameters from twitter.
+        Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/sampled-stream/introduction
+        Parameters:
+            - everything: (bool) - if True, return all fields and expansions. (default = False)
+            - fields: (ObjectFields) - additional fields to return. (default = None)
+            - expansions: (UserExpansions) - Expansions enable requests to
+            expand an ID into a full object in the response. (default = None)
+        
+        Returns:
+            - Generator
+        Raises:
+            - Exception
+        """
+
+        return self._sampled_stream(
+            everything=everything, fields=fields, expansions=expansions
+        )
+
+    def _sampled_stream(
+        self,
+        everything: bool = False,
+        fields: ObjectFields = None,
+        expansions: UserExpansions = None,
+    ) -> Generator[bytes, None, None]:
+        """
+        Streams a random 1% sample of all the tweets.
+        User fields included by default match the default parameters from twitter.
+        Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/sampled-stream/introduction
+        Parameters:
+            - everything: (bool) - if True, return all fields and expansions. (default = False)
+            - fields: (ObjectFields) - additional fields to return. (default = None)
+            - expansions: (UserExpansions) - Expansions enable requests to
+            expand an ID into a full object in the response. (default = None)
+        
+        Returns:
+            - Generator
+        Raises:
+            - Exception
+        """
+
+        payload = self._decorate_payload(
+            payload=None,
+            endpoint_type="tweet",
+            everything=everything,
+            fields=fields,
+            expansions=expansions,
+        )
+
+        url = f"{self._base_url}/tweets/sample/stream"
+
+        # create a connection to the API that will be used to stream tweets
+        response = self._oauth.make_request(
+            method="GET", url=url, payload=payload, stream=True
+        )
+
+        if response.status_code != 200:
+            raise Exception(
+                f"Request returned an error: {response.status_code} {response.text}"
+            )
+        else:
+            # If connection succeeded, return a generator that is used to stream tweets
+            return response
