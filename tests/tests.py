@@ -229,6 +229,34 @@ class TestUtils(unittest.TestCase):
                 )
             self.assertEqual(resp, correct_resp)
 
+class TestWranlge(unittest.TestCase):
+    """
+    Test all wrangle package methods
+    """
+    def setUp(self):
+        self.wrangle = osometweet.wrangle
+        self._dictionary = {'a': 1, 'b': {'c': 2, 'd': 5}, 'e': {'f': 4, 'g': 3}, 'h': 3}
+        self._flat_dict1 = {'a': 1, 'b.c': 2, 'b.d': 5, 'e.f': 4, 'e.h': 3, 'i': 3}
+        self._flat_dict2 = {'a': 1, 'b/c': 2, 'b/d': 5, 'e/f': 4, 'e/h': 3, 'i': 3}
+        self._key_paths = [['a'], ['b', 'c'], ['b', 'd'], ['e', 'f'], ['e', 'g'], ['h']]
+
+    def test_flatten_dict(self):
+        flat_dict1 = self.wrangle.flatten_dict(self._dictionary)
+        self.assertEqual(flat_dict,self._flat_dict1)
+
+        flat_dict2 = self.wrangle.flatten_dict(
+            self._dictionary,
+            sep = "/"
+            )
+        self.assertEqual(_flat_dict2,self.flat_dict2)
+
+    def test_get_dict_paths(self):
+        key_paths = self.wrangle.get_dict_paths(self._dictionary)
+        self.assertEqual(key_paths,self._key_paths)
+
+    def test_get_dict_val(self):
+        value = self.wrangle.get_dict_val(self._key_paths[1])
+        self.assertEqual(value,2)
 
 if __name__ == "__main__":
     unittest.main()
