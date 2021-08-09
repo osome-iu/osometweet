@@ -2,6 +2,7 @@ import sys
 import os
 import unittest
 import osometweet
+import osometweet.wrangle
 
 api_key = os.environ.get('TWITTER_API_KEY', '')
 api_key_secret = os.environ.get('TWITTER_API_KEY_SECRET', '')
@@ -27,7 +28,7 @@ class TestOauth(unittest.TestCase):
             ).json()
         self.assertEqual(resp['data'][0]['id'], test_tweet_id)
         oauth1a._oauth_1a.close()
-    
+
     def test_1a_exception(self):
         with self.assertRaises(ValueError):
             osometweet.OAuth1a(api_key=1)
@@ -37,7 +38,7 @@ class TestOauth(unittest.TestCase):
             osometweet.OAuth1a(access_token=1)
         with self.assertRaises(ValueError):
             osometweet.OAuth1a(access_token_secret=1)
-    
+
     def test_2(self):
         oauth2 = osometweet.OAuth2(bearer_token=bearer_token)
         test_tweet_id = '1323314485705297926'
@@ -46,7 +47,7 @@ class TestOauth(unittest.TestCase):
             {"ids": f"{test_tweet_id}"}
             ).json()
         self.assertEqual(resp['data'][0]['id'], test_tweet_id)
-    
+
     def test_2_exception(self):
         with self.assertRaises(ValueError):
             osometweet.OAuth2(bearer_token=1)
@@ -65,19 +66,19 @@ class TestAPI(unittest.TestCase):
         resp = self.ot.tweet_lookup(tids=test_tweet_ids)
         for tweet in resp['data']:
             self.assertIn(tweet['id'], test_tweet_ids)
-    
+
     def test_user_lookup_ids(self):
         test_user_ids = ['12', '13']
         resp = self.ot.user_lookup_ids(test_user_ids)
         for user in resp['data']:
-            self.assertIn(user['id'], test_user_ids) 
+            self.assertIn(user['id'], test_user_ids)
 
     def test_user_lookup_usernames(self):
         test_user_usernames = ['jack', 'biz']
         resp = self.ot.user_lookup_usernames(test_user_usernames)
         for user in resp['data']:
-            self.assertIn(user['username'], test_user_usernames) 
-    
+            self.assertIn(user['username'], test_user_usernames)
+
     def test_get_followers(self):
         resp = self.ot.get_followers('12')
         self.assertEqual(resp['meta']['result_count'], len(resp['data']))
@@ -188,7 +189,7 @@ class TestExpansions(unittest.TestCase):
     def setUp(self):
         oauth2 = osometweet.OAuth2(bearer_token=bearer_token)
         self.ot = osometweet.OsomeTweet(oauth2)
-    
+
     def test_tweet_expansions(self):
         expansions_to_request = [
             "attachments.media_keys", "referenced_tweets.id", "author_id"
@@ -229,34 +230,41 @@ class TestUtils(unittest.TestCase):
                 )
             self.assertEqual(resp, correct_resp)
 
+
 class TestWranlge(unittest.TestCase):
     """
     Test all wrangle package methods
     """
     def setUp(self):
         self.wrangle = osometweet.wrangle
-        self._dictionary = {'a': 1, 'b': {'c': 2, 'd': 5}, 'e': {'f': 4, 'g': 3}, 'h': 3}
-        self._flat_dict1 = {'a': 1, 'b.c': 2, 'b.d': 5, 'e.f': 4, 'e.h': 3, 'i': 3}
-        self._flat_dict2 = {'a': 1, 'b/c': 2, 'b/d': 5, 'e/f': 4, 'e/h': 3, 'i': 3}
-        self._key_paths = [['a'], ['b', 'c'], ['b', 'd'], ['e', 'f'], ['e', 'g'], ['h']]
+        self._dictionary = {'a': 1, 'b': {'c': 2, 'd': 5}, 'e': {'f': 4, 'g': 3}, 'h': 3, 'i': 'jk'}
+        self._flat_dict1 = {'a': 1, 'b.c': 2, 'b.d': 5, 'e.f': 4, 'e.g': 3, 'h': 3, 'i': 'jk'}
+        self._flat_dict2 = {'a': 1, 'b/c': 2, 'b/d': 5, 'e/f': 4, 'e/g': 3, 'h': 3, 'i': 'jk'}
+        self._key_paths = [['a'], ['b', 'c'], ['b', 'd'], ['e', 'f'], ['e', 'g'], ['h'], ['i']]
 
     def test_flatten_dict(self):
         flat_dict1 = self.wrangle.flatten_dict(self._dictionary)
-        self.assertEqual(flat_dict,self._flat_dict1)
+        self.assertEqual(flat_dict1, self._flat_dict1)
 
         flat_dict2 = self.wrangle.flatten_dict(
             self._dictionary,
             sep = "/"
             )
-        self.assertEqual(_flat_dict2,self.flat_dict2)
+        self.assertEqual(flat_dict2, self._flat_dict2)
 
     def test_get_dict_paths(self):
         key_paths = self.wrangle.get_dict_paths(self._dictionary)
-        self.assertEqual(key_paths,self._key_paths)
+        self.assertEqual(list(key_paths), self._key_paths)
 
     def test_get_dict_val(self):
-        value = self.wrangle.get_dict_val(self._key_paths[1])
-        self.assertEqual(value,2)
+        value = self.wrangle.get_dict_val(self._dictionary, self._key_paths[1])
+        self.assertEqual(value, 2)
+
+        value = self.wrangle.get_dict_val(self._dictionary, ['i'])
+        self.assertEqual(value, 'jk')
+
+        value = self.wrangle.get_dict_val(self._dictionary, ['i', 'j'])
+        self.assertEqual(value, None)
 
 if __name__ == "__main__":
     unittest.main()
