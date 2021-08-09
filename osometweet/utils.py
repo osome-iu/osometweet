@@ -98,6 +98,7 @@ def chunker(seq: list, size: int) -> list:
         raise ValueError("`seq` must be a list")
     return list(seq[pos:pos + size] for pos in range(0, len(seq), size))
 
+
 def convert_date_to_iso(time_string:str, time_format="%Y-%m-%d") -> str:
     """
     Convert input `time_string` to the iso format that Twitter
@@ -153,7 +154,7 @@ def convert_date_to_iso(time_string:str, time_format="%Y-%m-%d") -> str:
         raise TypeError("`time_format` must be a string.")
 
     try:
-        date = datetime.strptime(time_string,time_format)
+        date = datetime.strptime(time_string, time_format)
         date = datetime.strftime(date, "%Y-%m-%dT%H:%M:%S") + "Z"
         return date
 
