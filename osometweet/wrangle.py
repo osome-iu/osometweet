@@ -1,3 +1,7 @@
+"""
+A collection of convenience functions for manipulating data.
+"""
+
 from collections.abc import MutableMapping
 
 def _flatten_dict_gen(d, parent_key, sep):
@@ -20,18 +24,21 @@ def flatten_dict(dictionary: dict, parent_key: str = '', sep: str = '.'):
         {'a.b.c': 1234}
 
     Parameters:
-        - dictionary (dict) : A dictionary object to flatten
-        - parent_key (str) : The base string that will prefix all
-            keys. Typically, left as and empty string (i.e., '')
-            unless you know what you're doing.
-        - sep (str) : The text you would like to separate key path items.
-            Default is a period (i.e., ".")
+    ----------
+    - dictionary (dict) : A dictionary object to flatten
+    - parent_key (str) : The base string that will prefix all
+        keys. Typically, left as and empty string (i.e., '')
+        unless you know what you're doing.
+    - sep (str) : The text you would like to separate key path items.
+        Default is a period (i.e., ".")
 
     Returns:
-        - flat_dict (dict) : a flattened version of `dictionary`
+    ----------
+    - flat_dict (dict) : a flattened version of `dictionary`
 
     Raises:
-        TypeError
+    ----------
+    - TypeError
 
     ---------
     Examples:
@@ -79,24 +86,27 @@ def flatten_dict(dictionary: dict, parent_key: str = '', sep: str = '.'):
     return flat_dict
 
 
-def get_dict_paths(dictionary: dict, path: list=[]):
+def get_dict_paths(dictionary: dict, path: list = []):
     """
     Return a generator which iterates over all full
     key paths within `dictionary`.
 
     Parameters:
-        - dictionary (dict) : this is the dictionary you'd like to pass
-        - path (list) : Typically left as an empty list. If not, the dictionary
-            key paths will all append to the provided list.
+    ----------
+    - dictionary (dict) : this is the dictionary you'd like to pass
+    - path (list) : Typically left as an empty list. If not, the dictionary
+        key paths will all append to the provided list.
 
     Returns:
-        - generator
+    ----------
+    - generator
 
     Raises:
-        - TypeError
+    ----------
+    - TypeError
 
-    -------
     Example:
+    ----------
 
     # Create dictionary
     dictionary = {
@@ -119,15 +129,18 @@ def get_dict_paths(dictionary: dict, path: list=[]):
     [['a'], ['b', 'c'], ['b', 'd'], ['e', 'f'], ['e', 'g'], ['h']]
 
     """
-    if not isinstance(path,list):
+    if not isinstance(path, list):
         raise TypeError("`path` must be a list")
 
     if not isinstance(dictionary, dict):
         yield path
     else:
-        yield from [new for key, val in dictionary.items() for new in get_dict_paths(val, path+[key])]
+        yield from [
+            new for key, val in dictionary.items()
+            for new in get_dict_paths(val, path+[key])
+        ]
 
-def get_dict_val(dictionary:dict, key_list:list=[]):
+def get_dict_val(dictionary: dict, key_list: list = []):
     """
     Return `dictionary` value at the end of the key path provided
     in `key_list`.
@@ -138,17 +151,21 @@ def get_dict_val(dictionary:dict, key_list:list=[]):
     If no value is present, a `None` is returned.
 
     Parameters:
-        - dictionary (dict) : the dictionary object to traverse
-        - key_list (list) : list of strings indicating what dict_obj
-            item to retrieve
-    Return:
-        - key value (if present) or None (if not present)
+    ----------
+    - dictionary (dict) : the dictionary object to traverse
+    - key_list (list) : list of strings indicating what dict_obj
+        item to retrieve
+
+    Returns:
+    ----------
+    - key value (if present) or None (if not present)
 
     Raises:
-        TypeError
+    ----------
+    - TypeError
 
     Examples:
-
+    ---------
     # Create dictionary
     dictionary = {
         "a" : 1,
@@ -197,8 +214,8 @@ def get_dict_val(dictionary:dict, key_list:list=[]):
     retval = dictionary
     for k in key_list:
 
-        # If retval is not an iterable, we're going too deep
-        if not hasattr(retval, '__iter__'):
+        # If retval is not a dictionary, we're going too deep
+        if not isinstance(retval, dict):
             return None
 
         if k in retval:
