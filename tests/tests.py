@@ -231,6 +231,22 @@ class TestUtils(unittest.TestCase):
                 )
             self.assertEqual(resp, correct_resp)
 
+    ### Two tests for the convert_date_to_iso method ###
+    def test_convert_date_to_iso(self):
+        test_times = ["2020-01-01", "2020-01-02-03-04-56"]
+        test_formats = ["%Y-%m-%d","%Y-%m-%d-%H-%M-%S"]
+        correct_responses = [
+            '2020-01-01T00:00:00Z',
+            '2020-01-02T03:04:56Z'
+            ]
+        zipper = zip(test_times, test_formats, correct_responses)
+        for time, fmt, correct_resp in zipper:
+            resp = osometweet.utils.convert_date_to_iso(
+                time_string = time,
+                time_format = fmt
+                )
+            self.assertEqual(resp, correct_resp)
+
 
 if __name__ == "__main__":
     unittest.main()
