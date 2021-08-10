@@ -185,7 +185,7 @@ def get_dict_val(dictionary: dict, key_list: list = []):
     key_list = ['b', 'c']
 
     # Execute function
-    get_keylist_val(dictionary, key_list)
+    get_dict_val(dictionary, key_list)
 
     # Returns
     2
@@ -198,7 +198,7 @@ def get_dict_val(dictionary: dict, key_list: list = []):
     key_list = ['b', 'k']
 
     # Execute function
-    value = get_keylist_val(dictionary, key_list)
+    value = get_dict_val(dictionary, key_list)
 
     # Returns NoneType because the provided path doesn't exist
     type(value)
