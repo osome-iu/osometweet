@@ -902,6 +902,9 @@ class OsomeTweet:
         response = self._oauth.make_request("GET", url, payload, stream=False)
         return response.json()
 
+    ########################################
+    ########################################
+    # Streaming endpoints
     def sampled_stream(
         self,
         everything: bool = False,
