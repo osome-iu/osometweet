@@ -10,8 +10,6 @@ INPUT:
 OUTPUT:
     - tweet_data--{todays-date}.json : a file where each line
     represents one tweet
-    - tweet_errors--{todays-date}.json : a file which records any
-    errors received (one per line).
 Author: Christopher Torres-Lugo
 """
 
@@ -49,7 +47,7 @@ def load_bearer_token():
 
 def stream_tweets(bearer_token):
     """
-    Stream tweets from twitter and write them directly to a new line
+    Write a filtered stream of tweets directly to a new line
     delimited JSON file, named with today's date in "%Y-%m-%d_%H-%M" format.
 
     Parameters
