@@ -9,7 +9,7 @@ class OAuthHandler:
         pass
 
     def make_request(
-        self, method: str, url: str, payload: dict, stream: bool = False
+        self, method: str, url: str, payload: dict, stream: bool = False, json: dict = {}
     ) -> requests.models.Response:
         """
         Method to make the HTTP request to Twitter API
@@ -18,6 +18,7 @@ class OAuthHandler:
             - method (str) - HTTP request method
             - url (str) - url of the endpoint
             - payload (dict) - payload of the request
+            - json (dict) - dict that will be passed to requests' json field
         Returns:
             - requests.models.Response
         """
@@ -29,7 +30,7 @@ class OAuthHandler:
 
                 # Make one request
                 response = self._make_one_request(
-                    method, url, payload=payload, stream=stream
+                    method, url, payload=payload, stream=stream, json=json
                 )
 
                 # The below returns:
@@ -41,7 +42,7 @@ class OAuthHandler:
         else:
             # Make request
             response = self._make_one_request(
-                method, url, payload=payload, stream=stream
+                method, url, payload=payload, stream=stream, json=json
             )
 
         return response
@@ -121,7 +122,7 @@ class OAuth1a(OAuthHandler):
         )
 
     def _make_one_request(
-        self, method: str, url: str, payload: dict, stream: bool = False
+        self, method: str, url: str, payload: dict, stream: bool = False, json: dict = {}
     ) -> requests.models.Response:
         """
         Method to make one HTTP request to Twitter API
@@ -188,7 +189,7 @@ class OAuth2(OAuthHandler):
             )
 
     def _make_one_request(
-        self, method: str, url: str, payload: dict, stream: bool = False
+        self, method: str, url: str, payload: dict, stream: bool = False, json: dict={}
     ) -> requests.models.Response:
         """
         Method to make one HTTP request to Twitter API
@@ -201,6 +202,6 @@ class OAuth2(OAuthHandler):
             - requests.models.Response
         """
         response = requests.request(
-            method, url, headers=self._header, params=payload, stream=stream
+            method, url, headers=self._header, params=payload, stream=stream, json=json
         )
         return response

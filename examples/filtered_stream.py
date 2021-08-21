@@ -56,6 +56,25 @@ def stream_tweets(bearer_token):
 
     # Add all tweet fields
     all_tweet_fields = osometweet.TweetFields(everything=True)
+    
+    # Add streaming rules
+    rules = [{"value":"coronavirus", "tag":"all coronavirus tweets"},
+             {"value":"indiana", "tag":"all indiana tweets"}]
+    add_rules = {"add": rules}
+    response = ot.set_filtered_stream_rule(rules=add_rules)
+    print(f"API response from adding two rules: {response}")
+    
+    # Retrieve active streaming rules
+    current_rules = ot.get_filtered_stream_rule()
+    print(f'The current filtered stream rules are: {current_rules}')
+    
+    # Remove a streaming rule
+    for data in current_rules.get('data'):
+        if data['tag'] == 'all indiana tweets':
+            all_indiana_tweets_id = data['id']
+            break
+    delete_rule = {"delete": all_indiana_tweets_id}
+    ot.set_filtered_stream_rule(rules=delete_rule)
 
     # Get today's date
     today = dt.strftime(dt.today(), "%Y-%m-%d_%H-%M")
@@ -63,9 +82,9 @@ def stream_tweets(bearer_token):
     # Open two files. One for good data, the other for tweet errors.
     with open(f"tweet_stream--{today}.json", "a") as data_file:
         # stream is a Generator
-        stream = ot.sampled_stream(fields=all_tweet_fields)
+        stream = ot.filtered_stream(fields=all_tweet_fields)
         # We have to iterate over the stream to fetch streamed tweets
-        for tweet in stream.iter_lines():
+        for tweet in stream.iter_lines():   
             # Get data and errors
             try:
                 data = json.loads(tweet).get("data")

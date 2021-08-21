@@ -824,7 +824,7 @@ class OsomeTweet:
         expansions: UserExpansions = None,
     ) -> Generator[bytes, None, None]:
         """
-        Streams a random 1% sample of all the tweets.
+        Streams a filtered 1% sample of all the tweets.
         User fields included by default match the default parameters from twitter.
         Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/sampled-stream/introduction
         Parameters:
@@ -861,3 +861,139 @@ class OsomeTweet:
         else:
             # If connection succeeded, return a generator that is used to stream tweets
             return response
+
+    def filtered_stream(
+        self,
+        everything: bool = False,
+        fields: ObjectFields = None,
+        expansions: UserExpansions = None,
+    ) -> Generator[bytes, None, None]:
+        """
+        Streams tweets that match the active streaming rules set by the user.
+        Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/introduction
+        Parameters:
+            - everything: (bool) - if True, return all fields and expansions. (default = False)
+            - fields: (ObjectFields) - additional fields to return. (default = None)
+            - expansions: (UserExpansions) - Expansions enable requests to
+            expand an ID into a full object in the response. (default = None)
+        
+        Returns:
+            - Generator
+        Raises:
+            - Exception
+        """
+
+        return self._filtered_stream(
+            everything=everything, fields=fields, expansions=expansions
+        )
+        
+        
+    def _filtered_stream(        
+        self,
+        everything: bool = False,
+        fields: ObjectFields = None,
+        expansions: UserExpansions = None,
+    ) -> Generator[bytes, None, None]:    
+        """
+        Streams tweets that match the active streaming rules set by the user.
+        Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/introduction
+        Parameters:
+            - everything: (bool) - if True, return all fields and expansions. (default = False)
+            - fields: (ObjectFields) - additional fields to return. (default = None)
+            - expansions: (UserExpansions) - Expansions enable requests to
+            expand an ID into a full object in the response. (default = None)
+        
+        Returns:
+            - Generator
+        Raises:
+            - Exception
+        """
+
+        payload = self._decorate_payload(
+            payload=None,
+            endpoint_type="tweet",
+            everything=everything,
+            fields=fields,
+            expansions=expansions,
+        )
+
+        url = f"{self._base_url}/tweets/search/stream"
+        
+        # create a connection to the API that will be used to stream tweets
+        response = self._oauth.make_request(
+            method="GET", url=url, payload=payload, stream=True
+        )
+
+        if response.status_code != 200:
+            raise Exception(
+                f"Request returned an error: {response.status_code} {response.text}"
+            )
+        else:
+            # If connection succeeded, return a generator that is used to stream tweets
+            return response
+        
+        
+    def set_filtered_stream_rule(self, rules, payload={}):
+        """ Modifies active streaming rules, be it by adding or removing them.
+        # Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/api-reference/post-tweets-search-stream-rules
+
+        Args:
+            rules (dict): Dictionary specifying a rule to be added or deleted
+            payload (dict, optional): Additional parameters used by the endpoint. Defaults to {}.
+
+        Returns:
+            dict: API response
+        """
+        
+        return self._set_filtered_stream_rule(rules, payload)
+        
+    def _set_filtered_stream_rule(self, rules, payload):
+        """ Modifies active streaming rules, be it by adding or removing them.
+        # Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/api-reference/post-tweets-search-stream-rules
+
+        Args:
+            rules (dict): Dictionary specifying a rule to be added or deleted
+            payload (dict, optional): Additional parameters used by the endpoint. Defaults to {}.
+
+        Returns:
+            dict: API response
+        """        
+        
+        url = f"{self._base_url}/tweets/search/stream/rules"
+        
+        response = self._oauth.make_request(
+            method="POST", url=url, payload=payload, json=rules
+        )
+        
+        return response.json()
+        
+    def get_filtered_stream_rule(self, payload={}):
+        """ Retrieves active streaming rules.
+        # Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/api-reference/get-tweets-search-stream-rules
+
+        Args:
+            payload (dict, optional): Additional parameters used by the endpoint. Defaults to {}.
+
+        Returns:
+            dict: active rules
+        """     
+        return self._get_filtered_stream_rule(payload)
+        
+    def _get_filtered_stream_rule(self, payload):
+        """ Retrieves active streaming rules.
+        # Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/api-reference/get-tweets-search-stream-rules
+
+        Args:
+            payload (dict, optional): Additional parameters used by the endpoint. Defaults to {}.
+
+        Returns:
+            dict: active rules
+        """             
+        
+        url = f"{self._base_url}/tweets/search/stream/rules"
+        
+        response = self._oauth.make_request(
+            method="GET", url=url, payload=payload
+        )
+        
+        return response.json()
