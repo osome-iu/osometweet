@@ -65,7 +65,7 @@ class OAuthHandler:
 
 class OAuth1a(OAuthHandler):
     """
-    Class to handle authenticiation through OAuth 1.0a with user context.
+    Class to handle authentication through OAuth 1.0a with user context.
 
     Parameters:
     ----------
@@ -170,7 +170,7 @@ class OAuth1a(OAuthHandler):
 
 class OAuth2(OAuthHandler):
     """
-    Class to handle authenticiation through OAuth 2.0 without user context.
+    Class to handle authentication through OAuth 2.0 without user context.
 
     Parameters:
     ----------

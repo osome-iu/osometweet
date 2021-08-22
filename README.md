@@ -3,7 +3,7 @@
 
 ### Introduction
 
-The OSoMeTweet project intends to provide a set of tools to help researchers work with the V2 API of Twitter.
+The OSoMeTweet project intends to provide a set of tools to help researchers work with Twitter's V2 API.
 
 The [Wiki](https://github.com/osome-iu/osometweet/wiki) includes a detailed documentation of how to use all methods. Also, we will use the wiki to store knowledge gathered by those who are building this package.
 
@@ -22,7 +22,7 @@ pip install osometweet
 
 **Warning 1**: The package is still in development, so not all endpoints are included and those which are included may not be 100% robust. Please see the list of issues for known problems. 
 
-**Warning 2**: We will try to keep the interface of the package consistent, but there maybe drastic changes in the future.
+**Warning 2**: We will try to keep the interface of the package consistent, but there may be drastic changes in the future.
 
 #### Use the newest features & local development
 
@@ -55,6 +55,16 @@ Go to `tests` directory and run:
 python tests.py
 ```
 
+> Note: you will need to have the following environment variables set in order for the tests to
+work properly.
+> - TWITTER_API_KEY
+> - TWITTER_API_KEY_SECRET
+> - TWITTER_ACCESS_TOKEN
+> - TWITTER_ACCESS_TOKEN_SECRET
+> - TWITTER_BEARER_TOKEN
+> 
+> If you're not sure what these are, check out [this](https://developer.twitter.com/en/docs/authentication/overview) page to learn how Twitter authentication works.
+
 ### How to seek help and contribute
 
 OSoMeTweet will be a community project and your help is welcome!
@@ -75,7 +85,7 @@ ot = osometweet.OsomeTweet(oauth2)
 # Set some test IDs (these are Twitter's own accounts)
 ids2find = ["2244994945", "6253282"]
 
-# Call the function without these ids
+# Call the function with these ids as input
 response = ot.user_lookup_ids(user_ids=ids2find)
 print(response["data"])
 ```
@@ -100,5 +110,4 @@ We have documented (and will continue to document) information about Twitter's V
 * Academic Track [Benefits](https://github.com/osome-iu/osometweet/wiki/Info:-Academic-Track-Benefits) and [Details](https://github.com/osome-iu/osometweet/wiki/Info:-Academic-Track-Details)
 
 ### Example Scripts
-We offer [example scripts](examples) for working with different endpoints. We recommend that you read and understand the instructions on the [Wiki page](https://github.com/osome-iu/osometweet/wiki) the package prior to using these scripts
-
+We offer [example scripts](examples) for working with different endpoints. We recommend that you read and understand the methods by reading the relevant package [Wiki](https://github.com/osome-iu/osometweet/wiki) pages prior to using these scripts.
