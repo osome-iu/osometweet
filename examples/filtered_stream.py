@@ -70,19 +70,20 @@ def stream_tweets(bearer_token):
              {"value": "indiana", "tag": "all indiana tweets"}]
     add_rules = {"add": rules}
     response = ot.set_filtered_stream_rule(rules=add_rules)
-    print(f"API response from adding two rules: {response}")
+    print(f"API response from adding two rules:\n{response}\n")
 
     # Retrieve active streaming rules
     current_rules = ot.get_filtered_stream_rule()
-    print(f'The current filtered stream rules are: {current_rules}')
+    print(f'The current filtered stream rules are:\n{current_rules}\n')
 
-    # Remove a streaming rule
-    for data in current_rules.get('data'):
-        if data['tag'] == 'all indiana tweets':
-            all_indiana_tweets_id = data['id']
-            break
-    delete_rule = {"delete": all_indiana_tweets_id}
-    ot.set_filtered_stream_rule(rules=delete_rule)
+    # Remove a streaming rule by using it's tag
+    indiana_rule = [
+        rule["id"] for rule in current_rules["data"]
+        if 'all indiana tweets' in rule["tag"]
+    ]
+    delete_rule = {'delete': {'ids': indiana_rule}}
+    response = ot.set_filtered_stream_rule(rules=delete_rule)
+    print(f"API response from deleting one rule:\n{response}\n")
 
     # Get today's date
     today = dt.strftime(dt.today(), "%Y-%m-%d_%H-%M")
