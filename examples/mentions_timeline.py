@@ -5,8 +5,9 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 PURPOSE:
-    - Script to scrape up to the most recent 800 tweets sent by a provided
-    user ID by utilizing the V2 Twitter mentions timeline endpoint.
+    - Script to scrape up to the 800 most recent tweets mentioning a single
+    user specified by the requested user ID by utilizing the V2 Twitter
+    mentions timeline endpoint.
 
     Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/timelines/api-reference/get-users-id-mentions
 
