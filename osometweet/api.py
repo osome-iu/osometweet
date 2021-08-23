@@ -860,11 +860,7 @@ class OsomeTweet:
         - ValueError
         """
         query_specs = {
-            "id": {
-                "phrase": "user ids",
-                "parameter_name": "ids",
-                "endpoint": "users"
-            },
+            "id": {"phrase": "user ids", "parameter_name": "ids", "endpoint": "users"},
             "username": {
                 "phrase": "usernames",
                 "parameter_name": "usernames",
