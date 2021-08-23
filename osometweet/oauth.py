@@ -3,16 +3,14 @@ from requests_oauthlib import OAuth1Session
 
 from osometweet.rate_limit_manager import manage_rate_limits
 
+
 class OAuthHandler:
     def __init__(self):
         pass
 
     def make_request(
-        self,
-        method: str,
-        url: str,
-        payload: dict
-       ) -> requests.models.Response:
+        self, method: str, url: str, payload: dict, stream: bool = False, json: dict = {}
+    ) -> requests.models.Response:
         """
         Method to make the HTTP request to Twitter API
 
@@ -20,6 +18,7 @@ class OAuthHandler:
             - method (str) - HTTP request method
             - url (str) - url of the endpoint
             - payload (dict) - payload of the request
+            - json (dict) - dict that will be passed to requests' json field
         Returns:
             - requests.models.Response
         """
@@ -31,10 +30,8 @@ class OAuthHandler:
 
                 # Make one request
                 response = self._make_one_request(
-                    method,
-                    url,
-                    payload=payload
-                    )
+                    method, url, payload=payload, stream=stream, json=json
+                )
 
                 # The below returns:
                 #    True: if there was an error that we waited for,
@@ -45,10 +42,8 @@ class OAuthHandler:
         else:
             # Make request
             response = self._make_one_request(
-                method,
-                url,
-                payload=payload
-                )
+                method, url, payload=payload, stream=stream, json=json
+            )
 
         return response
 
@@ -83,14 +78,14 @@ class OAuth1a(OAuthHandler):
             - https://developer.twitter.com/en/docs/authentication/oauth-1-0a
 
     """
+
     def __init__(
         self,
         api_key: str = "",
         api_key_secret: str = "",
         access_token: str = "",
         access_token_secret: str = "",
-        manage_rate_limits: bool = True
-
+        manage_rate_limits: bool = True,
     ) -> None:
         super(OAuth1a, self).__init__()
         self._api_key = api_key
@@ -108,25 +103,27 @@ class OAuth1a(OAuthHandler):
         Raises:
             - Exception, ValueError
         """
-        for key_name in ['api_key', 'api_key_secret', 'access_token', 'access_token_secret']:
-            if not isinstance(getattr(self, '_' + key_name), str):
+        for key_name in [
+            "api_key",
+            "api_key_secret",
+            "access_token",
+            "access_token_secret",
+        ]:
+            if not isinstance(getattr(self, "_" + key_name), str):
                 raise ValueError(
                     f"Invalid type for parameter {key_name}, must be a string."
-                    )
+                )
         # Get oauth object
         self._oauth_1a = OAuth1Session(
             self._api_key,
-            client_secret = self._api_key_secret,
-            resource_owner_key = self._access_token,
-            resource_owner_secret = self._access_token_secret
-            )
+            client_secret=self._api_key_secret,
+            resource_owner_key=self._access_token,
+            resource_owner_secret=self._access_token_secret,
+        )
 
     def _make_one_request(
-        self,
-        method: str,
-        url: str,
-        payload: dict
-       ) -> requests.models.Response:
+        self, method: str, url: str, payload: dict, stream: bool = False, json: dict = {}
+    ) -> requests.models.Response:
         """
         Method to make one HTTP request to Twitter API
 
@@ -137,16 +134,10 @@ class OAuth1a(OAuthHandler):
         Returns:
             - requests.models.Response
         """
-        if method.upper() == 'GET':
-            response = self._oauth_1a.get(
-                url,
-                params=payload
-                )
-        elif method.upper() == 'POST':
-            response = self._oauth_1a.post(
-                url,
-                params=payload
-                )            
+        if method.upper() == "GET":
+            response = self._oauth_1a.get(url, params=payload, stream=stream)
+        elif method.upper() == "POST":
+            response = self._oauth_1a.post(url, params=payload, stream=stream)
         return response
 
 
@@ -174,11 +165,8 @@ class OAuth2(OAuthHandler):
             - https://developer.twitter.com/en/docs/authentication/oauth-2-0
 
     """
-    def __init__(
-        self,
-        bearer_token: str = "",
-        manage_rate_limits: bool = True
-    ) -> None:
+
+    def __init__(self, bearer_token: str = "", manage_rate_limits: bool = True) -> None:
         super(OAuth2, self).__init__()
         self._bearer_token = bearer_token
         self._manage_rate_limits = manage_rate_limits
@@ -201,10 +189,7 @@ class OAuth2(OAuthHandler):
             )
 
     def _make_one_request(
-        self,
-        method: str,
-        url: str,
-        payload: dict
+        self, method: str, url: str, payload: dict, stream: bool = False, json: dict={}
     ) -> requests.models.Response:
         """
         Method to make one HTTP request to Twitter API
@@ -217,9 +202,6 @@ class OAuth2(OAuthHandler):
             - requests.models.Response
         """
         response = requests.request(
-            method,
-            url,
-            headers=self._header,
-            params=payload
-            )
+            method, url, headers=self._header, params=payload, stream=stream, json=json
+        )
         return response
