@@ -162,9 +162,19 @@ class OAuth1a(OAuthHandler):
         - requests.models.Response
         """
         if method.upper() == "GET":
-            response = self._oauth_1a.get(url, params=payload, stream=stream)
+            response = self._oauth_1a.get(
+                url,
+                params=payload,
+                stream=stream,
+                json=json
+            )
         elif method.upper() == "POST":
-            response = self._oauth_1a.post(url, params=payload, stream=stream)
+            response = self._oauth_1a.post(
+                url,
+                params=payload,
+                stream=stream,
+                json=json
+            )
         return response
 
 
