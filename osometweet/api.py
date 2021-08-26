@@ -913,6 +913,10 @@ class OsomeTweet:
         User fields included by default match the default parameters from
         twitter.
 
+        Note: Rate Limit Manager cannot be used with this endpoint. When
+        calling osometweet.OAuth2() for authorization, make sure to set the
+        `rate_limit_manager` value equal to `False`.
+
         Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/sampled-stream/introduction
 
         Parameters:
@@ -948,6 +952,10 @@ class OsomeTweet:
         User fields included by default match the default parameters from
         twitter.
 
+        Note: Rate Limit Manager cannot be used with this endpoint. When
+        calling osometweet.OAuth2() for authorization, make sure to set the
+        `rate_limit_manager` value equal to `False`.
+
         Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/sampled-stream/introduction
 
         Parameters:
@@ -967,6 +975,12 @@ class OsomeTweet:
         ----------
         - Exception
         """
+        if self._oauth._manage_rate_limits:
+            raise Exception(
+                "Rate Limit Manager cannot be used with streaming endpoints. "
+                "When calling osometweet.OAuth2(), make sure to set the "
+                "`rate_limit_manager` value equal to `False` and try again."
+            )
 
         payload = self._decorate_payload(
             payload=None,
@@ -1002,6 +1016,10 @@ class OsomeTweet:
         """
         Streams tweets that match the active streaming rules set by the user.
 
+        Note: Rate Limit Manager cannot be used with this endpoint. When
+        calling osometweet.OAuth2() for authorization, make sure to set the
+        `rate_limit_manager` value equal to `False`.
+
         Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/introduction
 
         Parameters:
@@ -1035,6 +1053,10 @@ class OsomeTweet:
         """
         Streams tweets that match the active streaming rules set by the user.
 
+        Note: Rate Limit Manager cannot be used with this endpoint. When
+        calling osometweet.OAuth2() for authorization, make sure to set the
+        `rate_limit_manager` value equal to `False`.
+
         Ref: https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/introduction
 
         Parameters:
@@ -1054,6 +1076,12 @@ class OsomeTweet:
         ----------
         - Exception
         """
+        if self._oauth._manage_rate_limits:
+            raise Exception(
+                "Rate Limit Manager cannot be used with streaming endpoints. "
+                "When calling osometweet.OAuth2(), make sure to set the "
+                "`rate_limit_manager` value equal to `False` and try again."
+            )
 
         payload = self._decorate_payload(
             payload=None,
