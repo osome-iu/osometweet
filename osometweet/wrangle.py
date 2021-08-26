@@ -69,7 +69,8 @@ def flatten_dict(dictionary: dict, parent_key: str = '', sep: str = '.'):
     flatten_dict(dictionary, parent_key = "NEW")
 
     # Returns
-    {'NEW.a': 1, 'NEW.b.c': 2, 'NEW.b.d': 5, 'NEW.e.f': 4, 'NEW.e.h': 3, 'NEW.i': 3}
+    {'NEW.a': 1, 'NEW.b.c': 2, 'NEW.b.d': 5,
+    'NEW.e.f': 4, 'NEW.e.h': 3, 'NEW.i': 3}
 
     ~~~
     ### 3. Changing `sep`
@@ -81,7 +82,8 @@ def flatten_dict(dictionary: dict, parent_key: str = '', sep: str = '.'):
 
     """
     if not isinstance(dictionary, dict):
-        raise TypeError("`dictionary` must be a dictionary (i.e., type(dictionary) == dict)")
+        raise TypeError(
+            "`dictionary` must be of type `dict`")
     flat_dict = dict(_flatten_dict_gen(dictionary, parent_key, sep))
     return flat_dict
 
@@ -130,15 +132,16 @@ def get_dict_paths(dictionary: dict, path: list = []):
 
     """
     if not isinstance(path, list):
-        raise TypeError("`path` must be a list")
+        raise TypeError("`path` must be of type `list`")
 
     if not isinstance(dictionary, dict):
         yield path
     else:
         yield from [
             new for key, val in dictionary.items()
-            for new in get_dict_paths(val, path+[key])
+            for new in get_dict_paths(val, path + [key])
         ]
+
 
 def get_dict_val(dictionary: dict, key_list: list = []):
     """
