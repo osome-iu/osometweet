@@ -9,7 +9,7 @@ tests_require = [
 
 setup(
     name="osometweet",
-    version="0.3",
+    version="0.4",
     description="OSoMe Twitter library for academic researchers",
     long_description=long_description,
     long_description_content_type="text/markdown",
