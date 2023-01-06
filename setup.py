@@ -9,7 +9,7 @@ tests_require = [
 
 setup(
     name="osometweet",
-    version="0.4",
+    version="0.5",
     description="OSoMe Twitter library for academic researchers",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -24,10 +24,7 @@ setup(
     },
     download_url="https://pypi.org/project/osometweet/",
     packages=["osometweet"],
-    install_requires=[
-        "requests>=2.24.0",
-        "requests_oauthlib>=1.3.0"
-    ],
+    install_requires=["requests>=2.24.0", "requests_oauthlib>=1.3.0"],
     tests_require=tests_require,
     python_requires=">=3.5",
 )
