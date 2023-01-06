@@ -135,7 +135,8 @@ class UserFields(ObjectFieldsBase):
     optional_fields = [
         "created_at", "description", "entities", "location",
         "pinned_tweet_id", "profile_image_url", "protected",
-        "public_metrics", "url", "verified", "withheld"
+        "public_metrics", "url", "verified", "verified_type",
+        "withheld"
     ]
     parameter_name = "user.fields"
 
